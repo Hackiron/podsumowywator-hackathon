@@ -4,6 +4,7 @@ from loguru import logger
 import requests
 from src.config_loader import load_config
 from urllib.parse import urljoin
+from src.memory import MessageMemory
 
 
 def _load_messages_from_api(
@@ -40,8 +41,8 @@ def _load_mock_messages(
 
 
 @function_tool
-def load_messages(channel_id: str, start_date: str, end_date: str) -> list[Message]:
-    """Load messages from a specified channel within a given date range.
+def load_messages(channel_id: str, start_date: str, end_date: str) -> str:
+    """Load messages from a specified channel within a given date range and store them in memory.
 
     Args:
         channel_id (str): The unique identifier of the channel to load messages from.
@@ -49,10 +50,14 @@ def load_messages(channel_id: str, start_date: str, end_date: str) -> list[Messa
         end_date (str): The end date in ISO format (YYYY-MM-DDTHH:MM:SS) to filter messages.
 
     Returns:
-        list[Message]: A list of messages from the channel within the date range.
+        str: UUID for retrieving the messages later
     """
     logger.info(
         f"Loading messages from channel {channel_id} between {start_date} and {end_date}"
     )
     messages = _load_mock_messages(channel_id, start_date, end_date)
-    return messages
+
+    # Store messages in memory
+    messages_uuid = MessageMemory.store_messages(messages)
+
+    return messages_uuid
