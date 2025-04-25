@@ -68,8 +68,18 @@ export class DiscordService {
           // This is a reply in a thread created by the bot
           try {
             message.channel.sendTyping();
-            // Respond to the message in the thread
-            await message.channel.send("Odpowiadam w wątku");
+
+            // Fetch all messages and format them using the helper method
+            const messagesArray = await this.formatMessagesArray(thread);
+            console.log("Thread messages:", messagesArray);
+
+            // Call the summary API and respond with the result
+            const channelId = thread.parentId;
+            const agentAnswer = await this.sendMessagesToAgent(
+              messagesArray,
+              channelId
+            );
+            await message.channel.send(agentAnswer);
           } catch (error: any) {
             return exceptionHandler(error, message);
           }
@@ -94,7 +104,15 @@ export class DiscordService {
             autoArchiveDuration: 1440, // Auto archive after 24 hours (in minutes)
           });
 
-          await thread.send("Rozpoczynam podsumowanie w tym wątku!");
+          // Get the messages to summarize
+          const messagesArray = await this.formatMessagesArray(thread);
+
+          const channelId = thread.parentId || message.channelId;
+          const agentAnswer = await this.sendMessagesToAgent(
+            messagesArray,
+            channelId
+          );
+          await thread.send(agentAnswer);
         } catch (error: any) {
           return exceptionHandler(error, message);
         }
@@ -102,6 +120,72 @@ export class DiscordService {
     });
 
     this.client.login(DISCORD_CLIENT_TOKEN);
+  }
+
+  /**
+   * Call the summary API with messages and return the summarized result
+   */
+  private async sendMessagesToAgent(
+    messages: any[],
+    channelId: string
+  ): Promise<string> {
+    const res = await fetch("http://localhost:8000/ruchniecie", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messages,
+        channelId,
+      }),
+    });
+
+    const data = await res.json();
+    return data.message;
+  }
+
+  /**
+   * Helper method to format messages from a thread or channel into a consistent array structure
+   */
+  private async formatMessagesArray(channel: any) {
+    const messages = await channel.messages.fetch();
+    let formattedMessages = [];
+
+    // If this is a thread, get the parent message that started it
+    if (channel.isThread()) {
+      try {
+        const parentMessage = await channel.fetchStarterMessage();
+        if (parentMessage) {
+          formattedMessages.push({
+            username:
+              parentMessage.author.globalName || parentMessage.author.username,
+            message: parentMessage.content,
+          });
+        }
+      } catch (error) {
+        console.error("Could not fetch starter message:", error);
+      }
+    }
+
+    // Format thread messages into {username, message} structure
+    const threadMessages = messages
+      .map(
+        (msg: {
+          author: { globalName?: string; username: string };
+          content: string;
+        }) => ({
+          username: msg.author.globalName || msg.author.username,
+          message: msg.content,
+        })
+      )
+      .filter(
+        (msg: { username: string; message: string }) =>
+          msg.message.trim() !== ""
+      )
+      .reverse(); // Reverse the array to have oldest messages first
+
+    // Combine the parent message with thread messages
+    return [...formattedMessages, ...threadMessages];
   }
 
   userResponseFactory(message: any) {
