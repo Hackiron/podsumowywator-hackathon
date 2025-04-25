@@ -1,9 +1,10 @@
 from agents import Agent, Runner
-from typing import Dict, Any
+from typing import Any
 from src.config_loader import load_config
 from src.tools.tools import TOOLS
 from src.dtos import SummaryRequest
 from src.prompt import SUMMARIZER_PROMPT
+
 
 class SummaryAgent:
     def __init__(self):
@@ -15,7 +16,7 @@ class SummaryAgent:
             tools=TOOLS,
         )
 
-    async def get_summary(self, summary_request: SummaryRequest) -> Dict[str, Any]:
+    async def get_summary(self, summary_request: SummaryRequest) -> dict[str, Any]:
         text = "\n".join(
             [
                 f"{message.username}: {message.message}"
