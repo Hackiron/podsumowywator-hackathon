@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Message(BaseModel):
@@ -8,4 +8,6 @@ class Message(BaseModel):
 
 class SummaryRequest(BaseModel):
     messages: list[Message]
-    channel_id: str
+    channel_id: str = Field(alias="channelId")
+
+    

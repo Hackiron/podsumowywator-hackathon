@@ -16,5 +16,5 @@ Content-Type: application/json
             "message": "Summarize messages between 2024-01-01 and 2024-01-02"
         }
     ],
-    "channel_id": "1234"
+    "channelId": "1234"
 }
