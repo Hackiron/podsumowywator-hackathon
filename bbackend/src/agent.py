@@ -3,7 +3,7 @@ from typing import Any
 from src.config_loader import load_config
 from src.tools.tools import TOOLS
 from src.dtos import SummaryRequest
-from src.prompt import ORCHESTRATOR_PROMPT
+from src.prompts.orchestrator_prompt import ORCHESTRATOR_PROMPT
 
 
 class OrchestratorAgent:
@@ -17,7 +17,8 @@ class OrchestratorAgent:
         )
 
     async def get_summary(self, summary_request: SummaryRequest) -> dict[str, Any]:
-        text = "\n".join(
+        channel_id = summary_request.channel_id
+        messages_string = "\n".join(
             [
                 f"{message.username}: {message.message}"
                 for message in summary_request.messages
@@ -25,7 +26,7 @@ class OrchestratorAgent:
         )
         result = await Runner.run(
             self.agent,
-            f"{text}",
+            f"Channel ID: {channel_id}\nMessages: {messages_string}",
         )
 
-        return {"summary": result.final_output}
+        return {"message": result.final_output}
