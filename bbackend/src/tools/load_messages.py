@@ -14,7 +14,7 @@ def _load_messages_from_api(
 
     url = urljoin(config.api_base_url, "/matchenatinderze")
 
-    params = {"channel_id": channel_id, "start_date": start_date, "end_date": end_date}
+    params = {"channelId": channel_id, "startDate": start_date, "endDate": end_date}
 
     try:
         response = requests.get(url, params=params, timeout=config.timeout_seconds)
