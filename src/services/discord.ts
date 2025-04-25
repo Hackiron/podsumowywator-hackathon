@@ -1,6 +1,5 @@
 import type { Channel } from "discord.js";
 import dotenv from "dotenv";
-import { pick } from "ramda";
 import { DiscordHelper } from "../helpers/discord.ts";
 import { delay, exceptionHandler } from "../utils/helpers.ts";
 import { ClientService } from "./client.ts";
@@ -27,7 +26,7 @@ export class DiscordService {
       startDate,
       endDate
     );
-    
+
     return messages;
   }
 
@@ -84,7 +83,8 @@ export class DiscordService {
               const channelId = "799677088609075212"; // Temporary for testing use ogólne
               const agentAnswer = await this.sendMessagesToAgent(
                 messagesArray,
-                channelId
+                channelId,
+                thread.id
               );
               await message.channel.send(agentAnswer);
             } catch (error: any) {
@@ -118,7 +118,8 @@ export class DiscordService {
             const channelId = "799677088609075212"; // Temporary for testing use ogólne
             const agentAnswer = await this.sendMessagesToAgent(
               messagesArray,
-              channelId
+              channelId,
+              thread.id
             );
             await thread.send(agentAnswer);
           } catch (error: any) {
@@ -141,7 +142,8 @@ export class DiscordService {
    */
   private async sendMessagesToAgent(
     messages: any[],
-    channelId: string
+    channelId: string,
+    threadId: string
   ): Promise<string> {
     const res = await fetch("http://localhost:8000/ruchniecie", {
       method: "POST",
@@ -151,6 +153,7 @@ export class DiscordService {
       body: JSON.stringify({
         messages,
         channelId,
+        threadId,
       }),
     });
 
