@@ -1,5 +1,7 @@
 import express from "express";
 import { DiscordService } from "./services/discord.ts";
+import { logger } from "./logger.ts";
+import morgan from "morgan";
 
 export function createServer(discordService: DiscordService) {
   const app = express();
@@ -7,11 +9,17 @@ export function createServer(discordService: DiscordService) {
 
   app.use(express.json());
 
-  // Middleware to log requests
-  app.use((req, res, next) => {
-    console.log(`${req.method} ${req.url}`);
-    next();
-  });
+  // Create a morgan stream that writes to our winston logger
+  const morganStream = {
+    write: (message: string) => {
+      // Remove the newline character that morgan adds
+      const trimmedMessage = message.trim();
+      logger.info(trimmedMessage);
+    }
+  };
+
+  // Use morgan middleware with our custom stream
+  app.use(morgan('combined', { stream: morganStream }));
 
   // Define your routes here
   app.get("/", (req, res) => {
@@ -35,14 +43,14 @@ export function createServer(discordService: DiscordService) {
         res.json(messages);
       })
       .catch((error) => {
-        console.error("Error fetching messages:", error);
+        logger.error("Error fetching messages:", error);
         res.status(500).json({ error: "Failed to fetch messages" });
       });
   });
 
   // Start the server
   const server = app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    logger.info(`Server is running on port ${PORT}`);
   });
 
   return {
