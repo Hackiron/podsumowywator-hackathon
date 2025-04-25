@@ -164,6 +164,13 @@ export class DiscordService {
   /**
    * Helper method to format messages from a thread or channel into a consistent array structure
    */
+  private replaceUserMentionsWithUsernames(content: string): string {
+    return content.replace(/<@!?(\d+)>/g, (match, userId) => {
+      const user = this.client.users.cache.get(userId);
+      return user ? user.globalName || user.username : match;
+    });
+  }
+
   private async formatMessagesArray(channel: any) {
     const messages = await channel.messages.fetch();
     let formattedMessages = [];
@@ -176,7 +183,9 @@ export class DiscordService {
           formattedMessages.push({
             username:
               parentMessage.author.globalName || parentMessage.author.username,
-            message: parentMessage.content,
+            message: this.replaceUserMentionsWithUsernames(
+              parentMessage.content
+            ),
           });
         }
       } catch (error) {
@@ -192,7 +201,7 @@ export class DiscordService {
           content: string;
         }) => ({
           username: msg.author.globalName || msg.author.username,
-          message: msg.content,
+          message: this.replaceUserMentionsWithUsernames(msg.content),
         })
       )
       .filter(
