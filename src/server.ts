@@ -2,6 +2,7 @@ import express from "express";
 import { DiscordService } from "./services/discord.ts";
 import { logger } from "./logger.ts";
 import morgan from "morgan";
+import { formatMessage } from "./utils/helpers.ts";
 
 export function createServer(discordService: DiscordService) {
   const app = express();
@@ -40,7 +41,9 @@ export function createServer(discordService: DiscordService) {
         req.query.endDate as string
       )
       .then((messages) => {
-        res.json(messages);
+        logger.info(`Fetched ${messages.length} messages`);
+        const formatted = messages.map(formatMessage);
+        res.json(formatted);
       })
       .catch((error) => {
         logger.error("Error fetching messages:", error);

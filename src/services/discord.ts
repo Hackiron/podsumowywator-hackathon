@@ -27,10 +27,8 @@ export class DiscordService {
       startDate,
       endDate
     );
-
-    const picked = messages.map((m) => pick(["content"], m));
-
-    return picked;
+    
+    return messages;
   }
 
   constructor() {
