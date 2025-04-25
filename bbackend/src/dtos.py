@@ -9,5 +9,3 @@ class Message(BaseModel):
 class SummaryRequest(BaseModel):
     messages: list[Message]
     channel_id: str = Field(alias="channelId")
-
-    

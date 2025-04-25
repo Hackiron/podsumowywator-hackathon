@@ -4,6 +4,7 @@ from src.config_loader import load_config
 from src.tools.tools import TOOLS
 from src.dtos import SummaryRequest
 from src.prompts.orchestrator_prompt import ORCHESTRATOR_PROMPT
+from loguru import logger
 
 
 class OrchestratorAgent:
@@ -24,9 +25,10 @@ class OrchestratorAgent:
                 for message in summary_request.messages
             ]
         )
+        logger.info(f"Orchestrator agent input: {messages_string}")
         result = await Runner.run(
             self.agent,
             f"Channel ID: {channel_id}\nMessages: {messages_string}",
         )
-
+        logger.info(f"Orchestrator agent result: {result.final_output}")
         return {"message": result.final_output}
