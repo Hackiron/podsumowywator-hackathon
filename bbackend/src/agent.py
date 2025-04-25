@@ -1,6 +1,9 @@
 from agents import Agent, Runner
 from typing import Dict, Any
 from src.config_loader import load_config
+from src.tools.tools import TOOLS
+from src.dtos import SummaryRequest
+
 
 class SummaryAgent:
     def __init__(self):
@@ -10,24 +13,20 @@ class SummaryAgent:
             instructions="""You are a helpful assistant specialized in summarizing text content.
             You provide clear, concise, and accurate summaries while maintaining the key points
             of the original content.""",
-            model=config.summarizer_model
+            model=config.summarizer_model,
+            tools=TOOLS,
         )
-        
-    async def get_summary(self, text: str) -> Dict[str, Any]:
-        """
-        Get a summary of the provided text using the agent.
-        
-        Args:
-            text (str): The text to summarize
-            
-        Returns:
-            Dict[str, Any]: A dictionary containing the summary and metadata
-        """
+
+    async def get_summary(self, summary_request: SummaryRequest) -> Dict[str, Any]:
+        text = "\n".join(
+            [
+                f"{message.username}: {message.message}"
+                for message in summary_request.messages
+            ]
+        )
         result = await Runner.run(
             self.agent,
-            f"Please provide a concise summary of the following text:\n\n{text}"
+            f"Please provide a concise summary of the following text:\n\n{text}",
         )
-        
-        return {
-            "summary": result.final_output
-        }
+
+        return {"summary": result.final_output}
