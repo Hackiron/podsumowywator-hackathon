@@ -82,7 +82,8 @@ export class DiscordService {
               console.log("Thread messages:", messagesArray);
 
               // Call the summary API and respond with the result
-              const channelId = thread.parentId;
+              // const channelId = thread.parentId;
+              const channelId = "799677088609075212"; // Temporary for testing use ogólne
               const agentAnswer = await this.sendMessagesToAgent(
                 messagesArray,
                 channelId
@@ -115,7 +116,8 @@ export class DiscordService {
             // Get the messages to summarize
             const messagesArray = await this.formatMessagesArray(thread);
 
-            const channelId = thread.parentId || message.channelId;
+            // const channelId = thread.parentId || message.channelId;
+            const channelId = "799677088609075212"; // Temporary for testing use ogólne
             const agentAnswer = await this.sendMessagesToAgent(
               messagesArray,
               channelId
