@@ -29,16 +29,16 @@ export class DiscordService {
       const channel = this.client.channels.cache.get(CHANNEL_ID);
 
       // TESTOWE POBIERANIE WIADOMOŚCI
-      const messages = await discordHelper.fetchMessages(
-        CHANNEL_ID,
-        "2025-04-13T00:00:00Z",
-        "2025-04-14T00:00:00Z"
-      );
+      // const messages = await discordHelper.fetchMessages(
+      //   CHANNEL_ID,
+      //   "2025-04-13T00:00:00Z",
+      //   "2025-04-14T00:00:00Z"
+      // );
 
-      console.log(
-        "messages: ",
-        messages.map((msg: any) => msg.content)
-      );
+      // console.log(
+      //   "messages: ",
+      //   messages.map((msg: any) => msg.content)
+      // );
 
       try {
         console.log(`Logged in as ${this.client.user.tag}!`);
@@ -54,16 +54,22 @@ export class DiscordService {
 
       // Check if message is in a thread
       if (message.channel.isThread()) {
-        // Check if the thread was created by the bot
         const thread = message.channel;
-        const threadStarter = await thread.fetchStarterMessage();
 
-        if (threadStarter && threadStarter.author.id === this.client.user.id) {
+        // Check if the thread owner is the bot
+        // In Discord.js, the thread owner is the one who created the thread
+        const threadOwner = thread.ownerId;
+
+        // Ensure the bot only responds to user messages in its own threads
+        if (
+          threadOwner === this.client.user.id &&
+          message.author.id !== this.client.user.id
+        ) {
           // This is a reply in a thread created by the bot
-          console.log(`Message in bot thread: ${message.content}`);
           try {
             message.channel.sendTyping();
-            // Handle thread reply here
+            // Respond to the message in the thread
+            await message.channel.send("Odpowiadam w wątku");
           } catch (error: any) {
             return exceptionHandler(error, message);
           }
