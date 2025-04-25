@@ -10,5 +10,14 @@ POST {{baseUrl}}/ruchniecie
 Content-Type: application/json
 
 {
-    "text": "This is some example text"
+    "messages": [
+        {
+            "username": "John",
+            "message": "Hello, how are you?"
+        },
+        {
+            "username": "Jane",
+            "message": "I'm good, thank you!"
+        }
+    ]
 }

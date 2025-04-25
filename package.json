@@ -7,7 +7,7 @@
     "podsum:build": "tsc",
     "podsum:run": "node dest/src",
     "podsum": "run-s podsum:build podsum:run",
-    "dev": "node --loader ts-node/esm src/index.ts"
+    "dev": "node --experimental-strip-types src/index.ts"
   },
   "author": "",
   "license": "ISC",
