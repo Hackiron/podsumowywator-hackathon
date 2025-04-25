@@ -1,9 +1,9 @@
 import dotenv from "dotenv";
 // import { Message, OpenAi } from "./openai.js";
-import { DiscordHelper } from "../helpers/discord.js";
-import { exceptionHandler } from "../utils/helpers.js";
-import { ClientService } from "./client.js";
-import { ContextService } from "./context.js";
+import { DiscordHelper } from "../helpers/discord.ts";
+import { exceptionHandler } from "../utils/helpers.ts";
+import { ClientService } from "./client.ts";
+import { ContextService } from "./context.ts";
 
 dotenv.config();
 const { DISCORD_CLIENT_TOKEN, CHANNEL_ID, PODSUMOWYWATOR_ID } = process.env;

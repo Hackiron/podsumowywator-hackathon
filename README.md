@@ -8,10 +8,17 @@
 - Extract the asdf binary in the archive into a directory on your $PATH.
 - Verify asdf is on your shell's $PATH by running type -a asdf. The directory you placed the asdf binary in should be listed on the first line of the output from type. If it is not that means step #2 was not completed correctly.
 
-### Install nodejs and python
+### Install nodejs, python, direnv
 
 ```
 asdf plugin add nodejs
 asdf plugin add python
+asdf plugin add direnv
 asdf install
+```
+
+Enable direnv
+
+```
+direnv allow .
 ```

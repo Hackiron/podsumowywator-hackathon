@@ -1,4 +1,4 @@
-import { DiscordService } from "./services/discord.js";
+import { DiscordService } from "./services/discord.ts";
 
 const init = () => {
   try {
