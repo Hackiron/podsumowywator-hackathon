@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from typing import List
 
 
 class Message(BaseModel):
@@ -8,4 +7,4 @@ class Message(BaseModel):
 
 
 class SummaryRequest(BaseModel):
-    messages: List[Message]
+    messages: list[Message]
