@@ -49,31 +49,48 @@ export class DiscordService {
     });
 
     this.client.on("messageCreate", async (message: any) => {
-      // Zapisz do kontekstu 6 ostatnich wiadomości.
-      const userMessage = this.userResponseFactory(message);
-      contextService.pushWithLimit(userMessage);
+      // Skip messages from the bot itself
+      if (message.author.username === "Podsumowywator") return;
 
-      console.log("last channel messages: ", contextService.getContext());
-      if (
-        message.content.includes(PODSUMOWYWATOR_ID) ||
-        message.mentions?.repliedUser?.username === "Podsumowywator"
-      ) {
-        if (message.author.username !== "Podsumowywator") {
+      // Check if message is in a thread
+      if (message.channel.isThread()) {
+        // Check if the thread was created by the bot
+        const thread = message.channel;
+        const threadStarter = await thread.fetchStarterMessage();
+
+        if (threadStarter && threadStarter.author.id === this.client.user.id) {
+          // This is a reply in a thread created by the bot
+          console.log(`Message in bot thread: ${message.content}`);
           try {
             message.channel.sendTyping();
-            // const assResponse = await openai.contextInteract([
-            //   this.systemContext,
-            //   ...contextService.getContext(),
-            // ]);
-
-            // assResponse && contextService.pushWithLimit(assResponse);
-
-            // const responseContent = `${assResponse.content.substring(0, 1950)}`;
-            // message.reply(responseContent);
-            message.reply("Działam!");
+            // Handle thread reply here
           } catch (error: any) {
             return exceptionHandler(error, message);
           }
+        }
+      }
+      // Not in a thread, check for mentions
+      else if (
+        message.content.includes(PODSUMOWYWATOR_ID) ||
+        message.mentions?.users?.has(this.client.user.id) ||
+        message.mentions?.repliedUser?.username === "Podsumowywator"
+      ) {
+        try {
+          message.channel.sendTyping();
+
+          // Create a thread from this message
+          const thread = await message.startThread({
+            name: `Podsumowanie: ${message.content
+              .substring(0, 50)
+              .replace(`<@${this.client.user.id}>`, "")}${
+              message.content.length > 50 ? "..." : ""
+            }`,
+            autoArchiveDuration: 1440, // Auto archive after 24 hours (in minutes)
+          });
+
+          await thread.send("Rozpoczynam podsumowanie w tym wątku!");
+        } catch (error: any) {
+          return exceptionHandler(error, message);
         }
       }
     });
@@ -82,8 +99,10 @@ export class DiscordService {
   }
 
   userResponseFactory(message: any) {
-    const modifiedUserResponseContent = `${message.author.globalName}: ${message.content}`;
-    // return openai.messageFactory(modifiedUserResponseContent);
+    return {
+      username: message.author.globalName,
+      message: message.content,
+    };
   }
 
   destroy() {
