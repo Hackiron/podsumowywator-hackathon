@@ -1,53 +1,61 @@
 import dotenv from "dotenv";
-// import { Message, OpenAi } from "./openai.js";
 import { DiscordHelper } from "../helpers/discord.ts";
-import { exceptionHandler } from "../utils/helpers.ts";
+import { delay, exceptionHandler } from "../utils/helpers.ts";
 import { ClientService } from "./client.ts";
 import { ContextService } from "./context.ts";
+import type { Channel, Client } from "discord.js";
+import { pick } from 'ramda';
 
 dotenv.config();
 const { DISCORD_CLIENT_TOKEN, CHANNEL_ID, PODSUMOWYWATOR_ID } = process.env;
 
-// const openai = new OpenAi();
-
 export class DiscordService {
-  private client: any;
-  // private systemContext: Message;
+  private client: Client;
+
+  private discordHelper: DiscordHelper;
+
+  private isReady: boolean = false;
+
+  async fetchMessages(channelId: string, startDate: string, endDate: string) {
+    while (!this.isReady) {
+      console.log("Waiting for Discord client to be ready...");
+      await delay(1000);
+    }
+
+    const messages = await this.discordHelper.fetchMessages(
+      channelId,
+      startDate,
+      endDate
+    )
+
+    const picked = messages.map(m => pick(['content'], m))
+
+    return picked;
+  }
+
   constructor() {
+    console.log("inits");
     const contextService = new ContextService([]);
     const clientService = new ClientService();
     this.client = clientService.getClient();
-    const discordHelper = new DiscordHelper(this.client);
+    this.discordHelper = new DiscordHelper(this.client);
 
-    // this.systemContext = {
-    //   role: "system",
-    //   content:
-    //     "Podsumuj Podane wiadomości. Z podanych wiadomości wyciągnij to o czym  była dyskusja i podsumuj. Podsumuj krótko zwięźle i na temat.",
-    // };
+    console.log("listeners");
+    if (JSON.parse(process.env.ENABLE_INITIAL_MESSAGE)) {
+      console.log("initial message enabled");
+      this.client.on("ready", async () => {
+        const channel = this.client.channels.cache.get(CHANNEL_ID) as Channel;
 
-    this.client.on("ready", async () => {
-      const channel = this.client.channels.cache.get(CHANNEL_ID);
+        try {
+          console.log(`Logged in as ${this.client.user.tag}!`);
+          channel.send(`Elo, jestem gotowy do podsumowywania!`);
+        } catch (error: any) {
+          return exceptionHandler(error, channel);
+        }
+      });
+    }
 
-      // TESTOWE POBIERANIE WIADOMOŚCI
-      // const messages = await discordHelper.fetchMessages(
-      //   CHANNEL_ID,
-      //   "2025-04-13T00:00:00Z",
-      //   "2025-04-14T00:00:00Z"
-      // );
-
-      // console.log(
-      //   "messages: ",
-      //   messages.map((msg: any) => msg.content)
-      // );
-
-      try {
-        console.log(`Logged in as ${this.client.user.tag}!`);
-        channel.send(`Elo, jestem gotowy do podsumowywania!`);
-      } catch (error: any) {
-        return exceptionHandler(error, channel);
-      }
-    });
-
+    if (JSON.parse(process.env.ENABLE_RESPONDING)) {
     this.client.on("messageCreate", async (message: any) => {
       // Skip messages from the bot itself
       if (message.author.username === "Podsumowywator") return;
@@ -100,8 +108,15 @@ export class DiscordService {
         }
       }
     });
+    }
+
+    console.log("login");
 
     this.client.login(DISCORD_CLIENT_TOKEN);
+
+    console.log("after login");
+
+    this.isReady = true;
   }
 
   userResponseFactory(message: any) {

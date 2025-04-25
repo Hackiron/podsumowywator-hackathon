@@ -22,6 +22,7 @@ export class DiscordHelper {
    * @returns Array of messages from the specified time period.
    */
   async fetchMessages(channelId: string | undefined, startDate: string, endDate: string): Promise<Message[]> {
+    console.log('Fetching messages...');
     if (!channelId) {
       throw new Error('Channel ID is required.');
     }
