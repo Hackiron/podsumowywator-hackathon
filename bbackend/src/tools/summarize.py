@@ -1,5 +1,5 @@
 from agents import Agent, Runner, function_tool
-from src.prompt import SUMMARIZER_PROMPT
+from src.prompts.summarizer_prompt import SUMMARIZER_PROMPT
 from loguru import logger
 from src.memory import MessageMemory
 from src.dtos import Message

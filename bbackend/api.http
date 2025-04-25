@@ -13,7 +13,8 @@ Content-Type: application/json
     "messages": [
         {
             "username": "Domin",
-            "message": "Summarize messages from channel 1234 between 2024-01-01 and 2024-01-02"
+            "message": "Summarize messages between 2024-01-01 and 2024-01-02"
         }
-    ]
+    ],
+    "channel_id": "1234"
 }
