@@ -1,0 +1,6 @@
+### Variables
+@baseUrl = http://localhost:8000
+
+### Welcome endpoint
+GET {{baseUrl}}/
+Accept: application/json

@@ -9,6 +9,8 @@ package-mode = false
 [tool.poetry.dependencies]
 python = "^3.11"
 openai-agents = "^0.0.13"
+fastapi = "^0.110.0"
+uvicorn = "^0.27.1"
 
 
 [build-system]
