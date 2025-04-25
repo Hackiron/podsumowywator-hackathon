@@ -1,0 +1,25 @@
+{
+  "name": "podsumowywator2",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "podsum:build": "tsc",
+    "podsum:run": "node dest/src",
+    "podsum": "run-s podsum:build podsum:run"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "discord.js": "^14.18.0",
+    "dotenv": "^16.5.0",
+    "openai": "^4.93.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.1",
+    "typescript": "^5.5.4",
+    "zod": "^3.24.2",
+    "npm-run-all": "^4.1.5"
+  }
+}
