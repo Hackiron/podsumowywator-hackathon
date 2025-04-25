@@ -4,9 +4,11 @@ version = "0.1.0"
 description = ""
 authors = ["Dombear <domin.dober@gmail.com>"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
-python = "3.11"
+python = "^3.11"
+openai-agents = "^0.0.13"
 
 
 [build-system]
