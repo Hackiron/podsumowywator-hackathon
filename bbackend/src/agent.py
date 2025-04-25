@@ -3,16 +3,16 @@ from typing import Any
 from src.config_loader import load_config
 from src.tools.tools import TOOLS
 from src.dtos import SummaryRequest
-from src.prompt import SUMMARIZER_PROMPT
+from src.prompt import ORCHESTRATOR_PROMPT
 
 
-class SummaryAgent:
+class OrchestratorAgent:
     def __init__(self):
         config = load_config()
         self.agent = Agent(
-            name="SummaryAssistant",
-            instructions=SUMMARIZER_PROMPT,
-            model=config.summarizer_model,
+            name="Orchestrator",
+            instructions=ORCHESTRATOR_PROMPT,
+            model=config.orchestrator_model,
             tools=TOOLS,
         )
 
@@ -25,7 +25,7 @@ class SummaryAgent:
         )
         result = await Runner.run(
             self.agent,
-            f"Please provide a concise summary of the following text:\n\n{text}",
+            f"{text}",
         )
 
         return {"summary": result.final_output}

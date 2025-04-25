@@ -6,7 +6,9 @@ from src.const import CONFIG_PATH
 @dataclass
 class Config:
     summarizer_model: str
-    message_loader_model: str
+    orchestrator_model: str
+    api_base_url: str
+    timeout_seconds: int
 
 
 def load_config() -> Config:
