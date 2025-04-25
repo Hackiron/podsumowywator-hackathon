@@ -55,7 +55,7 @@ def load_messages(channel_id: str, start_date: str, end_date: str) -> str:
     logger.info(
         f"Loading messages from channel {channel_id} between {start_date} and {end_date}"
     )
-    messages = _load_mock_messages(channel_id, start_date, end_date)
+    messages = _load_messages_from_api(channel_id, start_date, end_date)
 
     # Store messages in memory
     messages_uuid = MessageMemory.store_messages(messages)
