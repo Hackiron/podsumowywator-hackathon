@@ -1,125 +1,139 @@
+import type { Channel } from "discord.js";
 import dotenv from "dotenv";
-// import { Message, OpenAi } from "./openai.js";
+import { pick } from "ramda";
 import { DiscordHelper } from "../helpers/discord.ts";
-import { exceptionHandler } from "../utils/helpers.ts";
+import { delay, exceptionHandler } from "../utils/helpers.ts";
 import { ClientService } from "./client.ts";
 import { ContextService } from "./context.ts";
 
 dotenv.config();
 const { DISCORD_CLIENT_TOKEN, CHANNEL_ID, PODSUMOWYWATOR_ID } = process.env;
 
-// const openai = new OpenAi();
-
 export class DiscordService {
   private client: any;
-  // private systemContext: Message;
+
+  private discordHelper: DiscordHelper;
+
+  private isReady: boolean = false;
+
+  async fetchMessages(channelId: string, startDate: string, endDate: string) {
+    while (!this.isReady) {
+      console.log("Waiting for Discord client to be ready...");
+      await delay(1000);
+    }
+
+    const messages = await this.discordHelper.fetchMessages(
+      channelId,
+      startDate,
+      endDate
+    );
+
+    const picked = messages.map((m) => pick(["content"], m));
+
+    return picked;
+  }
+
   constructor() {
+    console.log("inits");
     const contextService = new ContextService([]);
     const clientService = new ClientService();
     this.client = clientService.getClient();
-    const discordHelper = new DiscordHelper(this.client);
+    this.discordHelper = new DiscordHelper(this.client);
 
-    // this.systemContext = {
-    //   role: "system",
-    //   content:
-    //     "Podsumuj Podane wiadomości. Z podanych wiadomości wyciągnij to o czym  była dyskusja i podsumuj. Podsumuj krótko zwięźle i na temat.",
-    // };
+    console.log("listeners");
+    if (JSON.parse(process.env.ENABLE_INITIAL_MESSAGE)) {
+      console.log("initial message enabled");
+      this.client.on("ready", async () => {
+        const channel = this.client.channels.cache.get(CHANNEL_ID) as Channel;
 
-    this.client.on("ready", async () => {
-      const channel = this.client.channels.cache.get(CHANNEL_ID);
+        try {
+          console.log(`Logged in as ${this.client.user.tag}!`);
+          channel.send(`Elo, jestem gotowy do podsumowywania!`);
+        } catch (error: any) {
+          return exceptionHandler(error, channel);
+        }
+      });
+    }
 
-      // TESTOWE POBIERANIE WIADOMOŚCI
-      // const messages = await discordHelper.fetchMessages(
-      //   CHANNEL_ID,
-      //   "2025-04-13T00:00:00Z",
-      //   "2025-04-14T00:00:00Z"
-      // );
+    if (JSON.parse(process.env.ENABLE_RESPONDING)) {
+      this.client.on("messageCreate", async (message: any) => {
+        // Skip messages from the bot itself
+        if (message.author.username === "Podsumowywator") return;
 
-      // console.log(
-      //   "messages: ",
-      //   messages.map((msg: any) => msg.content)
-      // );
+        // Check if message is in a thread
+        if (message.channel.isThread()) {
+          const thread = message.channel;
 
-      try {
-        console.log(`Logged in as ${this.client.user.tag}!`);
-        channel.send(`Elo, jestem gotowy do podsumowywania!`);
-      } catch (error: any) {
-        return exceptionHandler(error, channel);
-      }
-    });
+          // Check if the thread owner is the bot
+          // In Discord.js, the thread owner is the one who created the thread
+          const threadOwner = thread.ownerId;
 
-    this.client.on("messageCreate", async (message: any) => {
-      // Skip messages from the bot itself
-      if (message.author.username === "Podsumowywator") return;
+          // Ensure the bot only responds to user messages in its own threads
+          if (
+            threadOwner === this.client.user.id &&
+            message.author.id !== this.client.user.id
+          ) {
+            // This is a reply in a thread created by the bot
+            try {
+              message.channel.sendTyping();
 
-      // Check if message is in a thread
-      if (message.channel.isThread()) {
-        const thread = message.channel;
+              // Fetch all messages and format them using the helper method
+              const messagesArray = await this.formatMessagesArray(thread);
+              console.log("Thread messages:", messagesArray);
 
-        // Check if the thread owner is the bot
-        // In Discord.js, the thread owner is the one who created the thread
-        const threadOwner = thread.ownerId;
-
-        // Ensure the bot only responds to user messages in its own threads
-        if (
-          threadOwner === this.client.user.id &&
-          message.author.id !== this.client.user.id
+              // Call the summary API and respond with the result
+              const channelId = thread.parentId;
+              const agentAnswer = await this.sendMessagesToAgent(
+                messagesArray,
+                channelId
+              );
+              await message.channel.send(agentAnswer);
+            } catch (error: any) {
+              return exceptionHandler(error, message);
+            }
+          }
+        }
+        // Not in a thread, check for mentions
+        else if (
+          message.content.includes(PODSUMOWYWATOR_ID) ||
+          message.mentions?.users?.has(this.client.user.id) ||
+          message.mentions?.repliedUser?.username === "Podsumowywator"
         ) {
-          // This is a reply in a thread created by the bot
           try {
             message.channel.sendTyping();
 
-            // Fetch all messages and format them using the helper method
-            const messagesArray = await this.formatMessagesArray(thread);
-            console.log("Thread messages:", messagesArray);
+            // Create a thread from this message
+            const thread = await message.startThread({
+              name: `Podsumowanie: ${message.content
+                .substring(0, 50)
+                .replace(`<@${this.client.user.id}>`, "")}${
+                message.content.length > 50 ? "..." : ""
+              }`,
+              autoArchiveDuration: 1440, // Auto archive after 24 hours (in minutes)
+            });
 
-            // Call the summary API and respond with the result
-            const channelId = thread.parentId;
+            // Get the messages to summarize
+            const messagesArray = await this.formatMessagesArray(thread);
+
+            const channelId = thread.parentId || message.channelId;
             const agentAnswer = await this.sendMessagesToAgent(
               messagesArray,
               channelId
             );
-            await message.channel.send(agentAnswer);
+            await thread.send(agentAnswer);
           } catch (error: any) {
             return exceptionHandler(error, message);
           }
         }
-      }
-      // Not in a thread, check for mentions
-      else if (
-        message.content.includes(PODSUMOWYWATOR_ID) ||
-        message.mentions?.users?.has(this.client.user.id) ||
-        message.mentions?.repliedUser?.username === "Podsumowywator"
-      ) {
-        try {
-          message.channel.sendTyping();
+      });
+    }
 
-          // Create a thread from this message
-          const thread = await message.startThread({
-            name: `Podsumowanie: ${message.content
-              .substring(0, 50)
-              .replace(`<@${this.client.user.id}>`, "")}${
-              message.content.length > 50 ? "..." : ""
-            }`,
-            autoArchiveDuration: 1440, // Auto archive after 24 hours (in minutes)
-          });
-
-          // Get the messages to summarize
-          const messagesArray = await this.formatMessagesArray(thread);
-
-          const channelId = thread.parentId || message.channelId;
-          const agentAnswer = await this.sendMessagesToAgent(
-            messagesArray,
-            channelId
-          );
-          await thread.send(agentAnswer);
-        } catch (error: any) {
-          return exceptionHandler(error, message);
-        }
-      }
-    });
-
+    console.log("login");
     this.client.login(DISCORD_CLIENT_TOKEN);
+
+    console.log("after login");
+
+    this.isReady = true;
   }
 
   /**

@@ -1,11 +1,10 @@
+import { createServer } from "./server.ts";
 import { DiscordService } from "./services/discord.ts";
 
 const init = () => {
-  try {
-    new DiscordService();
-  } catch (error: any) {
-    console.log("Unexpected Error: ", error?.message);
-  }
+  const discordService = new DiscordService();
+
+  createServer(discordService);
 };
 
 init();

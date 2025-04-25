@@ -1,12 +1,12 @@
 from fastapi import FastAPI, HTTPException
-from src.agent import SummaryAgent
+from src.agent import OrchestratorAgent
 from src.dtos import SummaryRequest
 from dotenv import load_dotenv
 
 load_dotenv()
 app = FastAPI(title="Podsumowywator Hackathon Bbackend API")
 
-summary_agent = SummaryAgent()
+orchestrator_agent = OrchestratorAgent()
 
 
 @app.get("/")
@@ -17,7 +17,7 @@ async def root():
 @app.post("/ruchniecie")
 async def summarize(request: SummaryRequest):
     try:
-        result = await summary_agent.get_summary(request)
+        result = await orchestrator_agent.get_summary(request)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

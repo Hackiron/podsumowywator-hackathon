@@ -1,0 +1,5 @@
+GET http://localhost:3000/matchenatinderze?channelId=799677088609075212&startDate=2025-04-13T00:00:00Z&endDate=2025-04-14T00:00:00Z
+
+### wrong request
+
+GET http://localhost:3000/matchenatinderze

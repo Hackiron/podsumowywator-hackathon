@@ -6,3 +6,7 @@ export const exceptionHandler = (error: any, message: any) => {
       Zapytaj mnie proszę ponownie.`
     );
   }
+
+export const delay = (ms: number) => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
