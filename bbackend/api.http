@@ -4,3 +4,11 @@
 ### Welcome endpoint
 GET {{baseUrl}}/
 Accept: application/json
+
+### Ruchniecie
+POST {{baseUrl}}/ruchniecie
+Content-Type: application/json
+
+{
+    "text": "This is some example text"
+}
