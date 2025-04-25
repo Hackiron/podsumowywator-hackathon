@@ -5,6 +5,7 @@ import requests
 from src.config_loader import load_config
 from urllib.parse import urljoin
 from src.memory import MessageMemory
+from pydantic import ValidationError
 
 
 def _load_messages_from_api(
@@ -21,12 +22,23 @@ def _load_messages_from_api(
         response.raise_for_status()
 
         messages_data = response.json()
+
         return [
             Message(username=msg["username"], message=msg["message"])
             for msg in messages_data
         ]
+
+    except ValidationError as e:
+        logger.error(f"Pydantic validation error: {e.errors()}")
+        raise
+    except KeyError as e:
+        logger.error(f"Missing required field in message data: {e}")
+        raise ValueError(f"Message data missing required field: {e}")
     except requests.RequestException as e:
         logger.error(f"Failed to load messages from API: {str(e)}")
+        raise
+    except Exception as e:
+        logger.error(f"Other error: {str(e)}")
         raise
 
 
