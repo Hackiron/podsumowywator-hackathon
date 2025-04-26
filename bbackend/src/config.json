@@ -5,6 +5,6 @@
     "date_processor_model": "gpt-4.1-mini",
     "web_summarizer_model": "gpt-4.1-mini",
     "api_base_url": "http://localhost:3000",
-    "timeout_seconds": 60,
-    "main_language": "Polish"
+    "timeout_seconds": 300,
+    "main_language": "English"
 }
