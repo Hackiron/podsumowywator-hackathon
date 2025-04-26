@@ -57,10 +57,29 @@ export class DiscordHelper {
       for (const message of fetchedMessages.values()) {
         const messageDate = message.createdAt;
         if (messageDate >= start && messageDate <= end) {
+          // Replace user mentions with usernames
           message.content = replaceUserMentionsWithUsernames(
             message.content,
             this.client
           );
+
+          // Add image attachment URLs to the message content if any exist
+          if (message.attachments.size > 0) {
+            const imageAttachments = message.attachments.filter(
+              (attachment) =>
+                attachment.contentType?.startsWith("image/") ||
+                /\.(jpg|jpeg|png|gif|webp)$/i.test(attachment.name || "")
+            );
+
+            if (imageAttachments.size > 0) {
+              const attachmentUrls = [...imageAttachments.values()].map(
+                (attachment) => attachment.url
+              );
+
+              message.images = attachmentUrls; // Add image URLs to the message object
+            }
+          }
+
           messages.push(message);
         } else if (messageDate < start) {
           return messages; // If messages are older than startDate, stop fetching.

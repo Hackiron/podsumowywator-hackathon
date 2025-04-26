@@ -13,11 +13,12 @@ export const exceptionHandler = (error: any, message: any) => {
 };
 
 export const delay = (ms: number) => {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
 
 export const formatMessage = (message: Message) => ({
-    id: message.id,
-    message: message.content,
-    username: message.author.username,
-})
+  id: message.id,
+  message: message.content,
+  username: message.author.username,
+  images: message.images,
+});
