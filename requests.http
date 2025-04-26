@@ -4,6 +4,38 @@ GET http://localhost:3000/matchenatinderze?channelId=799677088609075212&startDat
 
 GET http://localhost:3000/matchenatinderze
 
+###
+
+
+# class Message(BaseModel):
+#     username: str
+#     message: str
+#     images: list[str]
+
+# class SummaryRequest(BaseModel):
+#     messages: list[Message]
+#     channel_id: str = Field(alias="channelId")
+#     thread_id: str = Field(alias="threadId")
+
+POST http://localhost:8000/ruchniecie
+Content-Type: application/json
+
+{
+    "channelId": "799677088609075212",
+    "threadId": "1234567890",
+    "messages": [
+        {
+            "username": "user1",
+            "message": "Co się działo od 1 do 3 kwietnia 2025?",
+            "images": []
+        }
+    ]
+}
+
 ### 
 
 GET http://localhost:8000/cache
+
+### 
+
+DELETE http://localhost:8000/cache

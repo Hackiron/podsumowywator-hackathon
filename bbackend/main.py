@@ -39,7 +39,7 @@ async def summarize(request: SummaryRequest):
         logger.info(f"Saving thread {request.thread_id} messages")
         MessageMemory.store_thread(request.thread_id, request.messages)
 
-        result = await orchestrator_agent.get_summary(request, cache)
+        result = await orchestrator_agent.get_summary(request)
         logger.info("Successfully generated summary")
         return result
     except Exception as e:
@@ -51,7 +51,7 @@ async def summarize(request: SummaryRequest):
 async def get_cache():
     try:
         logger.info("Fetching cache data")
-        cache_data = cache.get_cache()
+        cache_data = cache.get()
         logger.info("Successfully fetched cache data")
         return cache_data
     except Exception as e:

@@ -59,11 +59,11 @@ class ReadThroughCache:
         self.cache: Dict[str, List[Tuple[str, str, List[Message]]]] = {}  # Format: {channel_id: [(start_date, end_date, messages)]}
         self.use_mock = use_mock
 
-    def get_cache(self):
+    def get(self):
         """Return the current cache."""
         return self.cache
 
-    def clear_cache(self):
+    def clear(self):
         """Clear the entire cache."""
         self.cache.clear()
 
