@@ -14,8 +14,8 @@ class TestReadThroughCache:
         # Setup mock response
         mock_response = MagicMock()
         mock_response.json.return_value = [
-            {"username": "TestUser1", "message": "Test message 1", "images": []},
-            {"username": "TestUser2", "message": "Test message 2", "images": []},
+            {"username": "TestUser1", "message": "Test message 1", "images": [], "createdAt": "2023-01-01T10:00:00.000Z"},
+            {"username": "TestUser2", "message": "Test message 2", "images": [], "createdAt": "2023-01-01T11:00:00.000Z"},
         ]
         mock_get.return_value = mock_response
 
@@ -50,8 +50,8 @@ class TestReadThroughCache:
         # Setup mock response
         mock_response = MagicMock()
         mock_response.json.return_value = [
-            {"username": "TestUser1", "message": "Test message 1", "images": []},
-            {"username": "TestUser2", "message": "Test message 2", "images": []},
+            {"username": "TestUser1", "message": "Test message 1", "images": [], "createdAt": "2023-01-01T10:00:00.000Z"},
+            {"username": "TestUser2", "message": "Test message 2", "images": [], "createdAt": "2023-01-01T11:00:00.000Z"}
         ]
         mock_get.return_value = mock_response
 
@@ -83,15 +83,15 @@ class TestReadThroughCache:
         # Setup initial cache with data for 2025-04-03 to 2025-04-06
         mock_response1 = MagicMock()
         mock_response1.json.return_value = [
-            {"username": "User1", "message": "Cached message 1", "images": []},
-            {"username": "User2", "message": "Cached message 2", "images": []},
+            {"username": "User1", "message": "Cached message 1", "images": [], "createdAt": "2025-04-03T10:00:00.000Z"},
+            {"username": "User2", "message": "Cached message 2", "images": [], "createdAt": "2025-04-03T11:00:00.000Z"}
         ]
 
         # Setup response for missing range (2025-04-01 to 2025-04-03)
         mock_response2 = MagicMock()
         mock_response2.json.return_value = [
-            {"username": "User3", "message": "New message 1", "images": []},
-            {"username": "User4", "message": "New message 2", "images": []},
+            {"username": "User3", "message": "New message 1", "images": [], "createdAt": "2025-04-01T10:00:00.000Z"},
+            {"username": "User4", "message": "New message 2", "images": [], "createdAt": "2025-04-01T11:00:00.000Z"}
         ]
 
         # The mock will return different responses for different calls
@@ -139,20 +139,20 @@ class TestReadThroughCache:
         # Setup responses for initial ranges
         mock_response1 = MagicMock()
         mock_response1.json.return_value = [
-            {"username": "User1", "message": "Range 1 message 1", "images": []},
-            {"username": "User2", "message": "Range 1 message 2", "images": []},
+            {"username": "User1", "message": "Range 1 message 1", "images": [], "createdAt": "2025-04-01T10:00:00.000Z"},
+            {"username": "User2", "message": "Range 1 message 2", "images": [], "createdAt": "2025-04-01T11:00:00.000Z"}
         ]
 
         mock_response2 = MagicMock()
         mock_response2.json.return_value = [
-            {"username": "User3", "message": "Range 2 message 1", "images": []},
-            {"username": "User4", "message": "Range 2 message 2", "images": []},
+            {"username": "User3", "message": "Range 2 message 1", "images": [], "createdAt": "2025-04-06T10:00:00.000Z"},
+            {"username": "User4", "message": "Range 2 message 2", "images": [], "createdAt": "2025-04-06T11:00:00.000Z"}
         ]
 
         mock_response3 = MagicMock()
         mock_response3.json.return_value = [
-            {"username": "User5", "message": "Overlapping message 1", "images": []},
-            {"username": "User6", "message": "Overlapping message 2", "images": []},
+            {"username": "User5", "message": "Overlapping message 1", "images": [], "createdAt": "2025-04-02T10:00:00.000Z"},
+            {"username": "User6", "message": "Overlapping message 2", "images": [], "createdAt": "2025-04-02T11:00:00.000Z"}
         ]
 
         mock_get.side_effect = [mock_response1]
