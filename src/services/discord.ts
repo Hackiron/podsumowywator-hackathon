@@ -83,7 +83,8 @@ export class DiscordService {
 
               // Call the summary API and respond with the result
               // const channelId = thread.parentId;
-              const channelId = process.env.SOURCE_CHANNEL_ID ??  "799677088609075212"; // Temporary for testing use ogólne
+              const channelId =
+                process.env.SOURCE_CHANNEL_ID ?? "799677088609075212"; // Temporary for testing use ogólne
               const agentAnswer = await this.sendMessagesToAgent(
                 messagesArray,
                 channelId,
@@ -106,7 +107,7 @@ export class DiscordService {
 
             // Create a thread from this message
             const thread = await message.startThread({
-              name: `Podsumowanie: ${message.content
+              name: `Summary: ${message.content
                 .substring(0, 50)
                 .replace(`<@${this.client.user.id}>`, "")}${
                 message.content.length > 50 ? "..." : ""
@@ -118,7 +119,8 @@ export class DiscordService {
             const messagesArray = await this.formatMessagesArray(thread);
 
             // const channelId = thread.parentId || message.channelId;
-            const channelId = process.env.SOURCE_CHANNEL_ID ??  "799677088609075212"; // Temporary for testing use ogólne
+            const channelId =
+              process.env.SOURCE_CHANNEL_ID ?? "799677088609075212"; // Temporary for testing use ogólne
             const agentAnswer = await this.sendMessagesToAgent(
               messagesArray,
               channelId,
