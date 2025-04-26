@@ -28,6 +28,8 @@ export class DiscordService {
       endDate
     );
 
+    messages.reverse();
+
     return messages;
   }
 

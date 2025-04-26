@@ -15,7 +15,7 @@ Content-Type: application/json
     "messages": [
         {
             "username": "user1",
-            "message": "Co się działo 4 kwietnia 2025 między 8:00 a 12:00?",
+            "message": "Co się działo 17 kwietnia 2025 między 19:00 a 23:00?",
             "images": []
         }
     ]

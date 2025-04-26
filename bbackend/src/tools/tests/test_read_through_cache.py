@@ -127,11 +127,11 @@ class TestReadThroughCache:
         assert len(messages) == 4
 
         # Check if the messages from both ranges are present
-        usernames = [msg.username for msg in messages]
-        assert "User1" in usernames
-        assert "User2" in usernames
-        assert "User3" in usernames
-        assert "User4" in usernames
+        message_texts = [msg.message for msg in messages]
+        assert "New message 1" in message_texts
+        assert "New message 2" in message_texts
+        assert "Cached message 1" in message_texts
+        assert "Cached message 2" in message_texts 
 
     @patch("requests.get")
     def test_cache_optimization(self, mock_get):
@@ -155,7 +155,7 @@ class TestReadThroughCache:
             {"username": "User6", "message": "Overlapping message 2", "images": []},
         ]
 
-        mock_get.side_effect = [mock_response1, mock_response2, mock_response3]
+        mock_get.side_effect = [mock_response1]
 
         cache = ReadThroughCache()
         channel_id = "test-channel"
@@ -167,6 +167,8 @@ class TestReadThroughCache:
         assert len(first_messages) == 2
         assert len(cache.cache[channel_id][0].messages) == 2  # Verify cache content
 
+        mock_get.side_effect = [mock_response2]
+
         # Load second range and verify count
         second_messages = cache.load(
             channel_id, "2025-04-06T00:00:00.000Z", "2025-04-10T00:00:00.000Z"
@@ -176,6 +178,8 @@ class TestReadThroughCache:
         assert (
             sum(len(entry.messages) for entry in cache.cache[channel_id]) == 4
         )  # Total cached messages
+
+        mock_get.side_effect = [mock_response3]
 
         # Load overlapping range and verify final merged state
         third_messages = cache.load(
@@ -190,13 +194,17 @@ class TestReadThroughCache:
 
         # Verify all messages are preserved in the merged range
         all_messages = cached_entry.messages
-        print(
-            f"\nCache optimized: {len(all_messages)} messages in {len(cache.cache[channel_id])} range"
-        )
-        print(f"Range: {cached_entry.range.start} to {cached_entry.range.end}")
 
-        assert len(all_messages) == 6  # Sum of all unique messages
-        assert len({msg.username for msg in all_messages}) == 6  # All unique usernames
-        assert all(
-            f"User{i}" in {msg.username for msg in all_messages} for i in range(1, 7)
-        )
+        # Verify message order (from oldest to newest based on range order)
+        expected_order = [
+            ("User1", "Range 1 message 1"),      # From first range (oldest)
+            ("User2", "Range 1 message 2"),
+            ("User5", "Overlapping message 1"),  # From overlapping range
+            ("User6", "Overlapping message 2"),
+            ("User3", "Range 2 message 1"),      # From second range (newest)
+            ("User4", "Range 2 message 2"),
+        ]
+        
+        for i, (exp_user, exp_msg) in enumerate(expected_order):
+            assert all_messages[i].username == exp_user, f"Wrong message order at position {i}"
+            assert all_messages[i].message == exp_msg, f"Wrong message order at position {i}"
