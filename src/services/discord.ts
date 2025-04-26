@@ -2,6 +2,7 @@ import type { Channel } from "discord.js";
 import dotenv from "dotenv";
 import { DiscordHelper } from "../helpers/discord.ts";
 import { delay, exceptionHandler } from "../utils/helpers.ts";
+import { replaceUserMentionsWithUsernames } from "../utils/replaceUserMentionsWithUsernames.ts";
 import { ClientService } from "./client.ts";
 import { ContextService } from "./context.ts";
 
@@ -161,16 +162,6 @@ export class DiscordService {
     return data.message;
   }
 
-  /**
-   * Helper method to format messages from a thread or channel into a consistent array structure
-   */
-  private replaceUserMentionsWithUsernames(content: string): string {
-    return content.replace(/<@!?(\d+)>/g, (match, userId) => {
-      const user = this.client.users.cache.get(userId);
-      return user ? user.globalName || user.username : match;
-    });
-  }
-
   private async formatMessagesArray(channel: any) {
     const messages = await channel.messages.fetch();
     let formattedMessages = [];
@@ -183,8 +174,9 @@ export class DiscordService {
           formattedMessages.push({
             username:
               parentMessage.author.globalName || parentMessage.author.username,
-            message: this.replaceUserMentionsWithUsernames(
-              parentMessage.content
+            message: replaceUserMentionsWithUsernames(
+              parentMessage.content,
+              this.client
             ),
           });
         }
@@ -201,7 +193,7 @@ export class DiscordService {
           content: string;
         }) => ({
           username: msg.author.globalName || msg.author.username,
-          message: this.replaceUserMentionsWithUsernames(msg.content),
+          message: replaceUserMentionsWithUsernames(msg.content, this.client),
         })
       )
       .filter(

@@ -1,5 +1,6 @@
-import { Client, TextChannel, Message } from 'discord.js';
+import { Client, Message, TextChannel } from "discord.js";
 import dotenv from "dotenv";
+import { replaceUserMentionsWithUsernames } from "../utils/replaceUserMentionsWithUsernames.ts";
 
 dotenv.config();
 const { DISCORD_CLIENT_TOKEN } = process.env;
@@ -8,9 +9,9 @@ export class DiscordHelper {
   private client: Client;
 
   constructor(client: Client) {
-    this.client = client
+    this.client = client;
     this.client.login(DISCORD_CLIENT_TOKEN).catch((err) => {
-      console.error('Failed to login to Discord:', err);
+      console.error("Failed to login to Discord:", err);
     });
   }
 
@@ -21,34 +22,45 @@ export class DiscordHelper {
    * @param endDate End date (ISO string).
    * @returns Array of messages from the specified time period.
    */
-  async fetchMessages(channelId: string | undefined, startDate: string, endDate: string): Promise<Message[]> {
-    console.log('Fetching messages...');
+  async fetchMessages(
+    channelId: string | undefined,
+    startDate: string,
+    endDate: string
+  ): Promise<Message[]> {
+    console.log("Fetching messages...");
     if (!channelId) {
-      throw new Error('Channel ID is required.');
+      throw new Error("Channel ID is required.");
     }
     const start = new Date(startDate);
     const end = new Date(endDate);
 
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-      throw new Error('Invalid date format. Use ISO string format.');
+      throw new Error("Invalid date format. Use ISO string format.");
     }
 
     const channel = this.client.channels.cache.get(channelId);
 
     if (!channel || !(channel instanceof TextChannel)) {
-      throw new Error('Channel not found or is not a text channel.');
+      throw new Error("Channel not found or is not a text channel.");
     }
 
     const messages: Message[] = [];
     let lastMessageId: string | undefined;
 
     while (true) {
-      const fetchedMessages = await channel.messages.fetch({ limit: 100, before: lastMessageId });
+      const fetchedMessages = await channel.messages.fetch({
+        limit: 100,
+        before: lastMessageId,
+      });
       if (fetchedMessages.size === 0) break;
 
       for (const message of fetchedMessages.values()) {
         const messageDate = message.createdAt;
         if (messageDate >= start && messageDate <= end) {
+          message.content = replaceUserMentionsWithUsernames(
+            message.content,
+            this.client
+          );
           messages.push(message);
         } else if (messageDate < start) {
           return messages; // If messages are older than startDate, stop fetching.
@@ -61,4 +73,3 @@ export class DiscordHelper {
     return messages;
   }
 }
-
