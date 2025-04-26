@@ -67,15 +67,36 @@ export class DiscordHelper {
 
           // Add image attachment URLs to the message content if any exist
           if (message.attachments.size > 0) {
+            const getExtFromContentType = (
+              contentType: string
+            ): string | null => {
+              const match = contentType.match(/^image\/(.+)$/);
+              return match ? match[1] : null;
+            };
+
             const imageAttachments = message.attachments.filter(
-              (attachment) =>
-                attachment.contentType?.startsWith("image/") ||
-                /\.(jpg|jpeg|png|gif|webp)$/i.test(attachment.name || "")
+              (attachment) => {
+                if (attachment.contentType?.startsWith("image/")) {
+                  const ext = getExtFromContentType(attachment.contentType);
+                  return ext !== null;
+                }
+                return /\.(jpg|jpeg|png|gif|webp)$/i.test(
+                  attachment.name || ""
+                );
+              }
             );
 
             if (imageAttachments.size > 0) {
               const attachmentUrls = [...imageAttachments.values()].map(
-                (attachment) => attachment.url
+                (attachment) => {
+                  const ext = getExtFromContentType(attachment.contentType);
+                  const extension = ext === "jpg" ? "jpeg" : ext; // Convert jpg to jpeg for consistency
+
+                  return {
+                    url: attachment.url,
+                    extension,
+                  };
+                }
               );
 
               message.images = attachmentUrls; // Add image URLs to the message object
