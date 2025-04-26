@@ -39,7 +39,10 @@ def _load_messages_from_api(
 
         return [
             Message(
-                username=msg["username"], message=msg["message"], images=msg["images"], createdAt=msg["createdAt"]
+                username=msg["username"],
+                message=msg["message"],
+                images=msg["images"],
+                createdAt=msg["createdAt"],
             )
             for msg in messages_data
         ]

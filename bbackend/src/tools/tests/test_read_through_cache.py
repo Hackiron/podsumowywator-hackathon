@@ -14,8 +14,18 @@ class TestReadThroughCache:
         # Setup mock response
         mock_response = MagicMock()
         mock_response.json.return_value = [
-            {"username": "TestUser1", "message": "Test message 1", "images": [], "createdAt": "2023-01-01T10:00:00.000Z"},
-            {"username": "TestUser2", "message": "Test message 2", "images": [], "createdAt": "2023-01-01T11:00:00.000Z"},
+            {
+                "username": "TestUser1",
+                "message": "Test message 1",
+                "images": [],
+                "createdAt": "2023-01-01T10:00:00.000Z",
+            },
+            {
+                "username": "TestUser2",
+                "message": "Test message 2",
+                "images": [],
+                "createdAt": "2023-01-01T11:00:00.000Z",
+            },
         ]
         mock_get.return_value = mock_response
 
@@ -50,8 +60,18 @@ class TestReadThroughCache:
         # Setup mock response
         mock_response = MagicMock()
         mock_response.json.return_value = [
-            {"username": "TestUser1", "message": "Test message 1", "images": [], "createdAt": "2023-01-01T10:00:00.000Z"},
-            {"username": "TestUser2", "message": "Test message 2", "images": [], "createdAt": "2023-01-01T11:00:00.000Z"}
+            {
+                "username": "TestUser1",
+                "message": "Test message 1",
+                "images": [],
+                "createdAt": "2023-01-01T10:00:00.000Z",
+            },
+            {
+                "username": "TestUser2",
+                "message": "Test message 2",
+                "images": [],
+                "createdAt": "2023-01-01T11:00:00.000Z",
+            },
         ]
         mock_get.return_value = mock_response
 
@@ -83,15 +103,35 @@ class TestReadThroughCache:
         # Setup initial cache with data for 2025-04-03 to 2025-04-06
         mock_response1 = MagicMock()
         mock_response1.json.return_value = [
-            {"username": "User1", "message": "Cached message 1", "images": [], "createdAt": "2025-04-03T10:00:00.000Z"},
-            {"username": "User2", "message": "Cached message 2", "images": [], "createdAt": "2025-04-03T11:00:00.000Z"}
+            {
+                "username": "User1",
+                "message": "Cached message 1",
+                "images": [],
+                "createdAt": "2025-04-03T10:00:00.000Z",
+            },
+            {
+                "username": "User2",
+                "message": "Cached message 2",
+                "images": [],
+                "createdAt": "2025-04-03T11:00:00.000Z",
+            },
         ]
 
         # Setup response for missing range (2025-04-01 to 2025-04-03)
         mock_response2 = MagicMock()
         mock_response2.json.return_value = [
-            {"username": "User3", "message": "New message 1", "images": [], "createdAt": "2025-04-01T10:00:00.000Z"},
-            {"username": "User4", "message": "New message 2", "images": [], "createdAt": "2025-04-01T11:00:00.000Z"}
+            {
+                "username": "User3",
+                "message": "New message 1",
+                "images": [],
+                "createdAt": "2025-04-01T10:00:00.000Z",
+            },
+            {
+                "username": "User4",
+                "message": "New message 2",
+                "images": [],
+                "createdAt": "2025-04-01T11:00:00.000Z",
+            },
         ]
 
         # The mock will return different responses for different calls
@@ -131,7 +171,7 @@ class TestReadThroughCache:
         assert "New message 1" in message_texts
         assert "New message 2" in message_texts
         assert "Cached message 1" in message_texts
-        assert "Cached message 2" in message_texts 
+        assert "Cached message 2" in message_texts
 
     @patch("requests.get")
     def test_cache_optimization(self, mock_get):
@@ -139,20 +179,50 @@ class TestReadThroughCache:
         # Setup responses for initial ranges
         mock_response1 = MagicMock()
         mock_response1.json.return_value = [
-            {"username": "User1", "message": "Range 1 message 1", "images": [], "createdAt": "2025-04-01T10:00:00.000Z"},
-            {"username": "User2", "message": "Range 1 message 2", "images": [], "createdAt": "2025-04-01T11:00:00.000Z"}
+            {
+                "username": "User1",
+                "message": "Range 1 message 1",
+                "images": [],
+                "createdAt": "2025-04-01T10:00:00.000Z",
+            },
+            {
+                "username": "User2",
+                "message": "Range 1 message 2",
+                "images": [],
+                "createdAt": "2025-04-01T11:00:00.000Z",
+            },
         ]
 
         mock_response2 = MagicMock()
         mock_response2.json.return_value = [
-            {"username": "User3", "message": "Range 2 message 1", "images": [], "createdAt": "2025-04-06T10:00:00.000Z"},
-            {"username": "User4", "message": "Range 2 message 2", "images": [], "createdAt": "2025-04-06T11:00:00.000Z"}
+            {
+                "username": "User3",
+                "message": "Range 2 message 1",
+                "images": [],
+                "createdAt": "2025-04-06T10:00:00.000Z",
+            },
+            {
+                "username": "User4",
+                "message": "Range 2 message 2",
+                "images": [],
+                "createdAt": "2025-04-06T11:00:00.000Z",
+            },
         ]
 
         mock_response3 = MagicMock()
         mock_response3.json.return_value = [
-            {"username": "User5", "message": "Overlapping message 1", "images": [], "createdAt": "2025-04-02T10:00:00.000Z"},
-            {"username": "User6", "message": "Overlapping message 2", "images": [], "createdAt": "2025-04-02T11:00:00.000Z"}
+            {
+                "username": "User5",
+                "message": "Overlapping message 1",
+                "images": [],
+                "createdAt": "2025-04-02T10:00:00.000Z",
+            },
+            {
+                "username": "User6",
+                "message": "Overlapping message 2",
+                "images": [],
+                "createdAt": "2025-04-02T11:00:00.000Z",
+            },
         ]
 
         mock_get.side_effect = [mock_response1]
@@ -197,14 +267,18 @@ class TestReadThroughCache:
 
         # Verify message order (from oldest to newest based on range order)
         expected_order = [
-            ("User1", "Range 1 message 1"),      # From first range (oldest)
+            ("User1", "Range 1 message 1"),  # From first range (oldest)
             ("User2", "Range 1 message 2"),
             ("User5", "Overlapping message 1"),  # From overlapping range
             ("User6", "Overlapping message 2"),
-            ("User3", "Range 2 message 1"),      # From second range (newest)
+            ("User3", "Range 2 message 1"),  # From second range (newest)
             ("User4", "Range 2 message 2"),
         ]
-        
+
         for i, (exp_user, exp_msg) in enumerate(expected_order):
-            assert all_messages[i].username == exp_user, f"Wrong message order at position {i}"
-            assert all_messages[i].message == exp_msg, f"Wrong message order at position {i}"
+            assert all_messages[i].username == exp_user, (
+                f"Wrong message order at position {i}"
+            )
+            assert all_messages[i].message == exp_msg, (
+                f"Wrong message order at position {i}"
+            )

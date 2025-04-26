@@ -53,7 +53,7 @@ async def describe_image(
     question: str | None = None,
 ) -> str:
     """
-    Describe an image for given URL. This operation is slow and expensive, should be used only when necessary to answer the precise question.
+    Describe an image for given URL. This operation should be used only when necessary to answer the precise question.
 
     Args:
         image_url: The URL of the image to describe.
@@ -68,6 +68,7 @@ async def describe_image(
 
     logger.info(f"Describing image: {image_url} with question: {question}")
 
+    # base64_image = await _get_image_mock(image_url, wrapper_context.context.config)
     base64_image = await _get_image(image_url, wrapper_context.context.config)
 
     client = OpenAI()

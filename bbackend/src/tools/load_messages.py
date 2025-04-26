@@ -8,6 +8,28 @@ from src.memory import MessageMemory
 from src.dtos import ConversationContext
 
 
+def get_mocked_messages():
+    return [
+        Message(
+            username="Domin",
+            message="Hello, world! https://www.acidcave.net/",
+            images=[],
+            createdAt="2025-04-26T12:00:00Z",
+        ),
+        Message(
+            username="Wiktor",
+            message="Hello, world!",
+            images=[
+                Image(
+                    url="image-url",
+                    extension="jpeg",
+                )
+            ],
+            createdAt="2025-04-26T13:00:00Z",
+        ),
+    ]
+
+
 def create_load_messages(cache: ReadThroughCache):
     @function_tool
     def load_messages(channel_id: str, start_date: str, end_date: str) -> str:
@@ -25,26 +47,7 @@ def create_load_messages(cache: ReadThroughCache):
             f"Loading messages from channel {channel_id} between {start_date} and {end_date}"
         )
         messages = cache.load(channel_id, start_date, end_date)
-        # mocked
-        # messages = [
-        #     Message(
-        #         username="Domin",
-        #         message="Hello, world!",
-        #         images=[],
-        #         createdAt="2025-04-26T12:00:00Z",
-        #     ),
-        #     Message(
-        #         username="Wiktor",
-        #         message="Hello, world!",
-        #         images=[
-        #             Image(
-        #                 url="image-url",
-        #                 extension="jpeg",
-        #             )
-        #         ],
-        #         createdAt="2025-04-26T13:00:00Z",
-        #     ),
-        # ]
+        # messages = get_mocked_messages()
         logger.info(f"Loaded {len(messages)} messages")
 
         # Store messages in memory
