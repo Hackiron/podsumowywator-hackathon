@@ -2,12 +2,24 @@ from agents import Agent, Runner, function_tool
 from src.prompts.summarizer_prompt import SUMMARIZER_PROMPT
 from loguru import logger
 from src.memory import MessageMemory
-from src.dtos import Message, ConversationContext
+from src.dtos import Message, ConversationContext, Image
 from agents import RunContextWrapper
+from src.tools.summarizer_tools import SUMMARIZER_TOOLS
+
+
+def _images_to_string(images: list[Image]) -> str:
+    return "\n".join(
+        [f"url: {img.url}\nextension: {img.extension}\n" for img in images]
+    )
 
 
 def _messages_to_string(messages: list[Message]) -> str:
-    return "\n".join([f"{msg.username}: {msg.message}" for msg in messages])
+    return "\n".join(
+        [
+            f"{msg.username}: {msg.message}\n{_images_to_string(msg.images)}\n"
+            for msg in messages
+        ]
+    )
 
 
 @function_tool
@@ -33,6 +45,7 @@ async def summarizer_agent_tool(
         name="Summarizer",
         instructions=SUMMARIZER_PROMPT,
         model=wrapper_context.context.config.summarizer_model,
+        tools=SUMMARIZER_TOOLS,
     )
 
     messages_string = _messages_to_string(messages)
@@ -47,6 +60,7 @@ async def summarizer_agent_tool(
     result = await Runner.run(
         summarizer_agent,
         input_text,
+        context=wrapper_context.context,
     )
 
     logger.info(f"Summarizer agent result: {result.final_output}")

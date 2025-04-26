@@ -2,7 +2,7 @@ from agents import Agent, Runner
 from typing import Any
 from src.tools.read_through_cache import ReadThroughCache
 from src.config_loader import load_config
-from src.tools.tools import get_tools
+from src.tools.orchestrator_tools import get_orchestrator_tools
 from src.dtos import SummaryRequest, ConversationContext
 from src.prompts.orchestrator_prompt import ORCHESTRATOR_PROMPT
 from loguru import logger
@@ -14,9 +14,11 @@ class OrchestratorAgent:
         self.config = load_config()
         self.agent = Agent(
             name="Orchestrator",
-            instructions=ORCHESTRATOR_PROMPT.format(main_language=self.config.main_language),
+            instructions=ORCHESTRATOR_PROMPT.format(
+                main_language=self.config.main_language
+            ),
             model=self.config.orchestrator_model,
-            tools=get_tools(cache),
+            tools=get_orchestrator_tools(cache),
         )
 
     async def get_summary(self, summary_request: SummaryRequest) -> dict[str, Any]:

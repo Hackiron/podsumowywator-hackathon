@@ -38,5 +38,5 @@ Tomorrow 3 PM UTC
 
 User: What was discussed during last day?
 Response:
-• Only brief discussions with no important decisions made
+• Some casual conversations with no important decisions made
 """

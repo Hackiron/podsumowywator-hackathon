@@ -7,6 +7,7 @@ from urllib.parse import urljoin
 from src.memory import MessageMemory
 from src.dtos import ConversationContext
 
+
 def create_load_messages(cache: ReadThroughCache):
     @function_tool
     def load_messages(channel_id: str, start_date: str, end_date: str) -> str:

@@ -15,6 +15,7 @@ cache = ReadThroughCache()
 
 orchestrator_agent = OrchestratorAgent(cache)
 
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     logger.error(f"Request validation failed: {exc.errors()}")
@@ -47,6 +48,7 @@ async def summarize(request: SummaryRequest):
         logger.exception(e)
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/cache")
 async def get_cache():
     try:
@@ -58,6 +60,7 @@ async def get_cache():
         logger.error(f"Error fetching cache data: {str(e)}")
         logger.exception(e)
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.delete("/cache")
 async def clear_cache():

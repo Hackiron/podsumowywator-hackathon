@@ -2,10 +2,15 @@ from pydantic import BaseModel, Field
 from src.config_loader import Config
 
 
+class Image(BaseModel):
+    url: str
+    extension: str
+
+
 class Message(BaseModel):
     username: str
     message: str
-    images: list[str]
+    images: list[Image]
 
 
 class SummaryRequest(BaseModel):

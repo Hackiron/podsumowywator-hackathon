@@ -13,6 +13,7 @@ class Config:
     timeout_seconds: int
     main_language: str
 
+
 def load_config() -> Config:
     with open(CONFIG_PATH, "r") as f:
         config = json.load(f)
