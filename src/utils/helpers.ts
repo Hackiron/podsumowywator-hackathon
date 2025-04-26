@@ -21,4 +21,5 @@ export const formatMessage = (message: Message) => ({
   message: message.content,
   username: message.author.username,
   images: message.images,
+  createdAt: message.createdAt,
 });
