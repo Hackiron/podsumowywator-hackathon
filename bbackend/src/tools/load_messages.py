@@ -1,10 +1,11 @@
-from agents import function_tool
+from agents import RunContextWrapper, function_tool
 from src.dtos import Message
 from loguru import logger
 import requests
 from src.config_loader import load_config
 from urllib.parse import urljoin
 from src.memory import MessageMemory
+from src.dtos import ConversationContext
 from pydantic import ValidationError
 
 
@@ -53,7 +54,12 @@ def _load_mock_messages(
 
 
 @function_tool
-def load_messages(channel_id: str, start_date: str, end_date: str) -> str:
+def load_messages(
+    wrapper_context: RunContextWrapper[ConversationContext],
+    channel_id: str,
+    start_date: str,
+    end_date: str,
+) -> str:
     """Load messages from a specified channel within a given date range and store them in memory.
 
     Args:
