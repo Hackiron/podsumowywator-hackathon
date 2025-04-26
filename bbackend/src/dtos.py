@@ -11,6 +11,7 @@ class Message(BaseModel):
     username: str
     message: str
     images: list[Image]
+    created_at: str = Field(alias="createdAt")
 
 
 class SummaryRequest(BaseModel):

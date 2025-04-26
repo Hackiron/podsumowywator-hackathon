@@ -34,7 +34,7 @@ class OrchestratorAgent:
 
         messages_string = "\n".join(
             [
-                f"{message.username}: {message.message}"
+                f"{message.created_at} {message.username}: {message.message}"
                 for message in summary_request.messages
             ]
         )

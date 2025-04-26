@@ -9,6 +9,7 @@ class Config:
     orchestrator_model: str
     image_description_model: str
     date_processor_model: str
+    web_summarizer_model: str
     api_base_url: str
     timeout_seconds: int
     main_language: str
