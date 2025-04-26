@@ -1,12 +1,12 @@
 # podsumowywator2
 
-## Setup
-
-### Requirements
+## Requirements
 
 - Registered Discord bot and it's API token.
 - OpenAI API key.
 - FireCrawl API key.
+
+## Setup
 
 ### Install asdf
 
