@@ -20,6 +20,22 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/bbackend"
             }
+        },
+        {
+            "name": "Python: Debug Tests",
+            "type": "python",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "${file}",
+                "-v",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}/bbackend",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/bbackend"
+            }
         }
     ]
-} 
+}

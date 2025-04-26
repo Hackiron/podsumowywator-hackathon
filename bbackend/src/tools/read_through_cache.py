@@ -7,6 +7,17 @@ from ..memory import MessageMemory
 from pydantic import ValidationError
 from datetime import datetime, timedelta
 from typing import List, Tuple, Optional, Dict, Set
+from dataclasses import dataclass
+
+@dataclass
+class DateRange:
+    start: str
+    end: str
+
+@dataclass
+class CacheEntry:
+    range: DateRange
+    messages: List[Message]
 
 def _load_messages_from_api(
     channel_id: str, start_date: str, end_date: str
@@ -56,7 +67,7 @@ class ReadThroughCache:
     """A read-through cache that loads data from an API, storing it by date ranges."""
 
     def __init__(self, use_mock: bool = False):
-        self.cache: Dict[str, List[Tuple[str, str, List[Message]]]] = {}  # Format: {channel_id: [(start_date, end_date, messages)]}
+        self.cache: Dict[str, List[CacheEntry]] = {}
         self.use_mock = use_mock
 
     def get(self):
@@ -97,7 +108,7 @@ class ReadThroughCache:
         return self._parse_date(target_start) >= self._parse_date(cache_start) and \
                self._parse_date(target_end) <= self._parse_date(cache_end)
 
-    def _find_overlapping_ranges(self, channel_id: str, start_date: str, end_date: str) -> List[Tuple[str, str, List[Message]]]:
+    def _find_overlapping_ranges(self, channel_id: str, start_date: str, end_date: str) -> List[CacheEntry]:
         """Find all cached date ranges that overlap with the requested range."""
         if channel_id not in self.cache:
             return []
@@ -106,13 +117,13 @@ class ReadThroughCache:
         end_dt = self._parse_date(end_date)
         
         overlapping = []
-        for cached_start, cached_end, messages in self.cache[channel_id]:
-            cached_start_dt = self._parse_date(cached_start)
-            cached_end_dt = self._parse_date(cached_end)
+        for entry in self.cache[channel_id]:
+            cached_start_dt = self._parse_date(entry.range.start)
+            cached_end_dt = self._parse_date(entry.range.end)
             
             # Check if ranges overlap
             if not (end_dt < cached_start_dt or start_dt > cached_end_dt):
-                overlapping.append((cached_start, cached_end, messages))
+                overlapping.append(entry)
         
         return overlapping
 
@@ -141,13 +152,13 @@ class ReadThroughCache:
         return normalized
 
     def _calculate_missing_ranges(self, start_date: str, end_date: str, 
-                                overlapping_ranges: List[Tuple[str, str, List[Message]]]) -> List[Tuple[str, str]]:
+                                overlapping_ranges: List[CacheEntry]) -> List[Tuple[str, str]]:
         """Calculate precise date ranges that need to be fetched to avoid duplicates."""
         if not overlapping_ranges:
             return [(start_date, end_date)]
         
         # Sort overlapping ranges by start date
-        sorted_ranges = sorted(overlapping_ranges, key=lambda x: self._parse_date(x[0]))
+        sorted_ranges = sorted(overlapping_ranges, key=lambda x: self._parse_date(x.range.start))
         
         # Convert to datetime objects for easier manipulation
         start_dt = self._parse_date(start_date)
@@ -155,9 +166,9 @@ class ReadThroughCache:
         
         # Keep track of covered date ranges
         covered_ranges = []
-        for cached_start, cached_end, _ in sorted_ranges:
-            cached_start_dt = self._parse_date(cached_start)
-            cached_end_dt = self._parse_date(cached_end)
+        for entry in sorted_ranges:
+            cached_start_dt = self._parse_date(entry.range.start)
+            cached_end_dt = self._parse_date(entry.range.end)
             covered_ranges.append((cached_start_dt, cached_end_dt))
         
         # Find missing ranges by identifying gaps
@@ -194,9 +205,9 @@ class ReadThroughCache:
         if channel_id not in self.cache:
             return None
         
-        for cached_start, cached_end, messages in self.cache[channel_id]:
-            if self._is_range_contained(start_date, end_date, cached_start, cached_end):
-                return messages
+        for entry in self.cache[channel_id]:
+            if self._is_range_contained(start_date, end_date, entry.range.start, entry.range.end):
+                return entry.messages
         
         return None
 
@@ -224,27 +235,25 @@ class ReadThroughCache:
         # For this implementation, we return all messages since our test messages don't have timestamps
         return messages
 
-    def _merge_touching_ranges(self, channel_id: str, new_start: str, new_end: str, new_messages: List[Message]) -> Tuple[str, str, List[Message]]:
+    def _merge_touching_ranges(self, channel_id: str, new_start: str, new_end: str, new_messages: List[Message]) -> CacheEntry:
         """
         Add new range to cache and optimize.
         """
         if channel_id not in self.cache:
             self.cache[channel_id] = []
         
-        # Add new range to cache
-        self.cache[channel_id].append((new_start, new_end, new_messages))
+        new_entry = CacheEntry(range=DateRange(start=new_start, end=new_end), messages=new_messages)
+        self.cache[channel_id].append(new_entry)
         
-        # Optimize the entire cache for this channel
         self._optimize_cache(channel_id)
         
-        # Find the range that now contains our new data
-        for start, end, messages in self.cache[channel_id]:
-            if self._is_range_contained(new_start, new_end, start, end):
-                return (start, end, messages)
+        # Find the entry that now contains our new data
+        for entry in self.cache[channel_id]:
+            if self._is_range_contained(new_start, new_end, entry.range.start, entry.range.end):
+                return entry
         
-        # This shouldn't happen if optimization worked correctly
         logger.error("Cache optimization failed to maintain data consistency")
-        return (new_start, new_end, new_messages)
+        return new_entry
 
     def _optimize_cache(self, channel_id: str):
         """
@@ -254,32 +263,32 @@ class ReadThroughCache:
         if channel_id not in self.cache or not self.cache[channel_id]:
             return
 
-        # Sort ranges by start date
-        ranges = sorted(self.cache[channel_id], key=lambda x: self._parse_date(x[0]))
+        # Sort entries by start date
+        entries = sorted(self.cache[channel_id], key=lambda x: self._parse_date(x.range.start))
         optimized = []
-        current_start, current_end, current_messages = ranges[0]
-        current_start_dt = self._parse_date(current_start)
-        current_end_dt = self._parse_date(current_end)
+        current = entries[0]
+        current_end_dt = self._parse_date(current.range.end)
 
-        for next_start, next_end, next_messages in ranges[1:]:
-            next_start_dt = self._parse_date(next_start)
-            next_end_dt = self._parse_date(next_end)
+        for next_entry in entries[1:]:
+            next_start_dt = self._parse_date(next_entry.range.start)
 
-            # Check if ranges touch or overlap (within 1 second)
+            # Check if ranges touch or overlap
             if next_start_dt <= current_end_dt + timedelta(seconds=1):
-                # Merge the ranges
-                current_end_dt = max(current_end_dt, next_end_dt)
-                current_end = self._format_iso_date(current_end_dt)
-                current_messages = self._merge_messages([current_messages, next_messages])
+                # Merge the entries
+                current_end_dt = max(current_end_dt, self._parse_date(next_entry.range.end))
+                current = CacheEntry(
+                    range=DateRange(
+                        start=current.range.start,
+                        end=self._format_iso_date(current_end_dt)
+                    ),
+                    messages=self._merge_messages([current.messages, next_entry.messages])
+                )
             else:
-                # Add the current range and start a new one
-                optimized.append((current_start, current_end, current_messages))
-                current_start, current_end = next_start, next_end
-                current_start_dt, current_end_dt = next_start_dt, next_end_dt
-                current_messages = next_messages
+                optimized.append(current)
+                current = next_entry
+                current_end_dt = self._parse_date(current.range.end)
 
-        # Add the last range
-        optimized.append((current_start, current_end, current_messages))
+        optimized.append(current)
         self.cache[channel_id] = optimized
 
     def load(self, channel_id: str, start_date: str, end_date: str) -> List[Message]:
@@ -318,8 +327,8 @@ class ReadThroughCache:
         if overlapping_ranges:
             # Extract messages from overlapping ranges
             logger.debug(f"Found {len(overlapping_ranges)} overlapping cached ranges")
-            for cached_start, cached_end, messages in overlapping_ranges:
-                all_messages.append(messages)
+            for entry in overlapping_ranges:
+                all_messages.append(entry.messages)
             
             # Calculate exact missing date ranges
             missing_ranges = self._calculate_missing_ranges(start_date, end_date, overlapping_ranges)
@@ -342,7 +351,7 @@ class ReadThroughCache:
                         self.cache[channel_id] = []
                     
                     # Add to cache and optimize
-                    merged_start, merged_end, merged_messages = self._merge_touching_ranges(
+                    merged_entry = self._merge_touching_ranges(
                         channel_id, missing_start, missing_end, new_messages
                     )
                     # Note: _merge_touching_ranges now handles adding to cache and optimization
@@ -367,7 +376,7 @@ class ReadThroughCache:
             logger.debug(f"Fetched {len(messages)} messages from API")
             
             # Store in cache and optimize
-            merged_start, merged_end, merged_messages = self._merge_touching_ranges(
+            merged_entry = self._merge_touching_ranges(
                 channel_id, start_date, end_date, messages
             )
             

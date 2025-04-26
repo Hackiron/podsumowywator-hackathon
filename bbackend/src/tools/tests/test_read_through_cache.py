@@ -139,14 +139,14 @@ class TestReadThroughCache:
         # Setup responses for initial ranges
         mock_response1 = MagicMock()
         mock_response1.json.return_value = [
-            {"username": "User1", "message": "First range message 1", "images": []},
-            {"username": "User2", "message": "First range message 2", "images": []}
+            {"username": "User1", "message": "Range 1 message 1", "images": []},
+            {"username": "User2", "message": "Range 1 message 2", "images": []}
         ]
         
         mock_response2 = MagicMock()
         mock_response2.json.return_value = [
-            {"username": "User3", "message": "Second range message 1", "images": []},
-            {"username": "User4", "message": "Second range message 2", "images": []}
+            {"username": "User3", "message": "Range 2 message 1", "images": []},
+            {"username": "User4", "message": "Range 2 message 2", "images": []}
         ]
         
         mock_response3 = MagicMock()
@@ -160,28 +160,31 @@ class TestReadThroughCache:
         cache = ReadThroughCache()
         channel_id = "test-channel"
         
-        # Load first range: 2025-04-01 to 2025-04-03
-        cache.load(channel_id, "2025-04-01T00:00:00.000Z", "2025-04-03T00:00:00.000Z")
+        # Load first range and verify count
+        first_messages = cache.load(channel_id, "2025-04-01T00:00:00.000Z", "2025-04-03T00:00:00.000Z")
+        assert len(first_messages) == 2
+        assert len(cache.cache[channel_id][0].messages) == 2  # Verify cache content
         
-        # Load second range: 2025-04-06 to 2025-04-10
-        cache.load(channel_id, "2025-04-06T00:00:00.000Z", "2025-04-10T00:00:00.000Z")
-        
-        # Verify we have two separate ranges in cache
+        # Load second range and verify count
+        second_messages = cache.load(channel_id, "2025-04-06T00:00:00.000Z", "2025-04-10T00:00:00.000Z")
+        assert len(second_messages) == 2
         assert len(cache.cache[channel_id]) == 2
+        assert sum(len(entry.messages) for entry in cache.cache[channel_id]) == 4  # Total cached messages
         
-        # Load overlapping range: 2025-04-02 to 2025-04-07
-        cache.load(channel_id, "2025-04-02T00:00:00.000Z", "2025-04-07T00:00:00.000Z")
+        # Load overlapping range and verify final merged state
+        third_messages = cache.load(channel_id, "2025-04-02T00:00:00.000Z", "2025-04-07T00:00:00.000Z")
         
-        # Verify cache optimization resulted in a single range
+        # Verify cache optimization resulted in a single range with all messages
         assert len(cache.cache[channel_id]) == 1
+        cached_entry = cache.cache[channel_id][0]
+        assert cached_entry.range.start == "2025-04-01T00:00:00.000Z"
+        assert cached_entry.range.end == "2025-04-10T00:00:00.000Z"
         
-        # Verify the merged range spans the entire period
-        cached_range = cache.cache[channel_id][0]
-        assert cached_range[0] == "2025-04-01T00:00:00.000Z"  # start date
-        assert cached_range[1] == "2025-04-10T00:00:00.000Z"  # end date
-        
-        # Verify all messages are preserved
-        all_messages = cached_range[2]
-        usernames = {msg.username for msg in all_messages}
-        assert len(usernames) == 6  # All unique users from all ranges
-        assert all(f"User{i}" in usernames for i in range(1, 7))
+        # Verify all messages are preserved in the merged range
+        all_messages = cached_entry.messages
+        print(f"\nCache optimized: {len(all_messages)} messages in {len(cache.cache[channel_id])} range")
+        print(f"Range: {cached_entry.range.start} to {cached_entry.range.end}")
+
+        assert len(all_messages) == 6  # Sum of all unique messages
+        assert len({msg.username for msg in all_messages}) == 6  # All unique usernames
+        assert all(f"User{i}" in {msg.username for msg in all_messages} for i in range(1, 7))

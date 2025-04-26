@@ -15,12 +15,13 @@ Content-Type: application/json
     "messages": [
         {
             "username": "user1",
-            "message": "Co się działo od 6 do 11 kwietnia 2025?",
+            "message": "Co się działo 4 kwietnia 2025 między 8:00 a 12:00?",
             "images": []
         }
     ]
 }
 
+            # "message": "Co się działo od 5 do 7 kwietnia 2025?",
 ### 
 
 GET http://localhost:8000/cache
