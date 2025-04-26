@@ -18,10 +18,15 @@ def _load_messages_from_api(
     params = {"channelId": channel_id, "startDate": start_date, "endDate": end_date}
 
     try:
-        response = requests.get(url, params=params, timeout=config.timeout_seconds)
-        response.raise_for_status()
+        # response = requests.get(url, params=params, timeout=config.timeout_seconds)
+        # response.raise_for_status()
 
-        messages_data = response.json()
+        # messages_data = response.json()
+        # mock messages
+        messages_data = [
+            {"username": "John", "message": "Hello, how are you?"},
+            {"username": "Jane", "message": "I'm good, thank you!"},
+        ]
 
         return [
             Message(username=msg["username"], message=msg["message"])
