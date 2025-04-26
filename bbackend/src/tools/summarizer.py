@@ -16,7 +16,7 @@ def _images_to_string(images: list[Image]) -> str:
 def _messages_to_string(messages: list[Message]) -> str:
     return "\n".join(
         [
-            f"{msg.created_at} {msg.username}: {msg.message}\n{_images_to_string(msg.images)}\n"
+            f"{msg.created_at} {msg.username}: {msg.message}\nMessage images urls: {_images_to_string(msg.images)}\n"
             for msg in messages
         ]
     )
@@ -30,6 +30,7 @@ async def summarizer_agent_tool(
 ):
     """
     A tool that summarizes the messages and answers to the query.
+    Can also analyze the images in the messages.
     It works on the messages that are stored in the memory by the load_messages tool.
 
     Args:

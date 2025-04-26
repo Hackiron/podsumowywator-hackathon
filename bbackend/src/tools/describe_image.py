@@ -53,7 +53,7 @@ async def describe_image(
     question: str | None = None,
 ) -> str:
     """
-    Describe an image for given URL. This operation is slow and expensive, should be used only when necessary to answer the question.
+    Describe an image for given URL. This operation is slow and expensive, should be used only when necessary to answer the precise question.
 
     Args:
         image_url: The URL of the image to describe.

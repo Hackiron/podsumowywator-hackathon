@@ -56,7 +56,8 @@ Content-Type: application/json
         {
             "username": "Domin",
             "message": "Co tam się działo przez ostatnie 4 godziny?",
-            "images": []
+            "images": [],
+            "createdAt": "2025-04-26T14:00:00Z"
         }
     ],
     "channelId": "1234",
