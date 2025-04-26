@@ -2,6 +2,12 @@
 
 ## Setup
 
+### Requirements
+
+- Registered Discord bot and it's API token.
+- OpenAI API key.
+- FireCrawl API key.
+
 ### Install asdf
 
 - Visit https://github.com/asdf-vm/asdf/releases and download the appropriate archive for your operating system/architecture combination.
@@ -21,4 +27,37 @@ Enable direnv
 
 ```
 direnv allow .
+```
+
+### Env
+
+Copy `.env.example` to `.env` and fill it.
+
+### Setup backend
+
+See [./bbackend/README.md](./bbackend/README.md) starting from point 6.
+
+### Setup frontend
+
+Run
+
+```
+npm ci
+```
+
+### Development
+
+Start backend and frontend processes separately
+
+
+Backend:
+
+```
+cd bbackend && make
+```
+
+Frontend
+
+```
+npm run dev
 ```

@@ -40,5 +40,9 @@ Output: ("2024-03-15T00:00:00", "2024-03-18T16:30:00")
 Current date: 2024-03-18T22:19:23
 Input: "Give me the update"
 Output: None
+
+Current date: 2024-03-18T22:19:23
+Input: Co tam dzisiaj słychać?
+Output: ("2024-03-18T00:00:00", "2024-03-18T23:59:59")
 </examples>
 """

@@ -16,7 +16,7 @@ def _images_to_string(images: list[Image]) -> str:
 def _messages_to_string(messages: list[Message]) -> str:
     return "\n".join(
         [
-            f"{msg.created_at} {msg.username}: {msg.message}\n<Message images>\n{_images_to_string(msg.images)}\n</Message images>\n"
+            f"{msg.username}: {msg.message}\n<Message images>\n{_images_to_string(msg.images)}\n</Message images>\n"
             for msg in messages
         ]
     )
