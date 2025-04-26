@@ -46,7 +46,7 @@ export class DiscordService {
 
         try {
           console.log(`Logged in as ${this.client.user.tag}!`);
-          channel.send(`Elo, jestem gotowy do podsumowywania!`);
+          channel.send(`Hi! Podsumowywator is here!`);
         } catch (error: any) {
           return exceptionHandler(error, channel);
         }
