@@ -16,5 +16,29 @@ Content-Type: application/json
             "message": "Summarize messages between 2024-01-01 and 2024-01-02"
         }
     ],
-    "channelId": "1234"
+    "channelId": "1234",
+    "threadId": "1234"
+}
+
+### Ruchniecie long conversation
+POST {{baseUrl}}/ruchniecie
+Content-Type: application/json
+
+{
+    "messages": [
+        {
+            "username": "Domin",
+            "message": "Summarize messages between 2024-01-01 and 2024-01-02"
+        },
+        {
+            "username": "Assistant",
+            "message": "- John powitał Jane i zapytał, jak się ma"
+        },
+        {
+            "username": "Domin",
+            "message": "What Jane said?"
+        }
+    ],
+    "channelId": "1234",
+    "threadId": "1234"
 }
