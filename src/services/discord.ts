@@ -178,6 +178,7 @@ export class DiscordService {
               parentMessage.content,
               this.client
             ),
+            images: [],
           });
         }
       } catch (error) {
