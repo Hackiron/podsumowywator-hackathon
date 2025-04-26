@@ -10,11 +10,11 @@ from datetime import datetime
 
 class OrchestratorAgent:
     def __init__(self):
-        config = load_config()
+        self.config = load_config()
         self.agent = Agent(
             name="Orchestrator",
-            instructions=ORCHESTRATOR_PROMPT,
-            model=config.orchestrator_model,
+            instructions=ORCHESTRATOR_PROMPT.format(main_language=self.config.main_language),
+            model=self.config.orchestrator_model,
             tools=ORCHESTRATOR_TOOLS,
         )
 
@@ -23,10 +23,9 @@ class OrchestratorAgent:
         channel_id = summary_request.channel_id
         thread_id = summary_request.thread_id
 
-        config = load_config()
         conversation_context = ConversationContext(
             current_date=current_time,
-            config=config,
+            config=self.config,
         )
         logger.info(f"Conversation context: {conversation_context}")
 

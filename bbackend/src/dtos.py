@@ -5,6 +5,7 @@ from src.config_loader import Config
 class Message(BaseModel):
     username: str
     message: str
+    images: list[str]
 
 
 class SummaryRequest(BaseModel):

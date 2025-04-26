@@ -11,7 +11,7 @@ class Config:
     date_processor_model: str
     api_base_url: str
     timeout_seconds: int
-
+    main_language: str
 
 def load_config() -> Config:
     with open(CONFIG_PATH, "r") as f:

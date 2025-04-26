@@ -48,8 +48,8 @@ def _load_mock_messages(
 ) -> list[Message]:
     """Load mock messages for testing purposes."""
     return [
-        Message(username="John", message="Hello, how are you?"),
-        Message(username="Jane", message="I'm good, thank you!"),
+        Message(username="John", message="Hello, how are you?", images=[]),
+        Message(username="Jane", message="I'm good, thank you!", images=[]),
     ]
 
 
