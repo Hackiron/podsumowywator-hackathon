@@ -7,6 +7,7 @@ class MessageMemory:
     """In-memory storage for messages that need to be shared between tools."""
 
     _messages: dict[str, list[Message]] = {}
+    _threads: dict[str, list[Message]] = {}
 
     @classmethod
     def store_messages(cls, messages: list[Message]) -> str:
@@ -36,3 +37,12 @@ class MessageMemory:
             logger.warning(
                 f"Attempted to delete non-existent messages with UUID: {messages_uuid}"
             )
+
+    @classmethod
+    def store_thread(cls, thread_id: str, messages: list[Message]) -> None:
+        cls._threads[thread_id] = messages
+        logger.info(f"Stored {len(messages)} messages with thread ID: {thread_id}")
+
+    @classmethod
+    def get_thread(cls, thread_id: str) -> list[Message]:
+        return cls._threads[thread_id]

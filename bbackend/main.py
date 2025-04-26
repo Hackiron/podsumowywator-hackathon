@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from loguru import logger
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from src.memory import MessageMemory
 
 load_dotenv()
 app = FastAPI(title="Podsumowywator Hackathon Bbackend API")
@@ -34,6 +35,8 @@ async def summarize(request: SummaryRequest):
     try:
         logger.info(f"Received summary request for channel: {request.channel_id}")
         logger.info(f"Number of messages to summarize: {len(request.messages)}")
+        logger.info(f"Saving thread {request.thread_id} messages")
+        MessageMemory.store_thread(request.thread_id, request.messages)
 
         result = await orchestrator_agent.get_summary(request)
         logger.info("Successfully generated summary")
