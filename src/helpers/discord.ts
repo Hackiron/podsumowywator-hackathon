@@ -63,6 +63,8 @@ export class DiscordHelper {
             this.client
           );
 
+          message.images = []; // Initialize images array
+
           // Add image attachment URLs to the message content if any exist
           if (message.attachments.size > 0) {
             const imageAttachments = message.attachments.filter(
