@@ -1,7 +1,8 @@
 from agents import Agent, Runner
 from typing import Any
+from src.tools.read_through_cache import ReadThroughCache
 from src.config_loader import load_config
-from src.tools.tools import ORCHESTRATOR_TOOLS
+from src.tools.tools import get_tools
 from src.dtos import SummaryRequest, ConversationContext
 from src.prompts.orchestrator_prompt import ORCHESTRATOR_PROMPT
 from loguru import logger
@@ -9,13 +10,13 @@ from datetime import datetime
 
 
 class OrchestratorAgent:
-    def __init__(self):
+    def __init__(self, cache: ReadThroughCache):
         self.config = load_config()
         self.agent = Agent(
             name="Orchestrator",
             instructions=ORCHESTRATOR_PROMPT.format(main_language=self.config.main_language),
             model=self.config.orchestrator_model,
-            tools=ORCHESTRATOR_TOOLS,
+            tools=get_tools(cache),
         )
 
     async def get_summary(self, summary_request: SummaryRequest) -> dict[str, Any]:
