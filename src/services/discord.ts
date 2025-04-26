@@ -181,6 +181,7 @@ export class DiscordService {
               this.client
             ),
             images: [],
+            createdAt: parentMessage.createdAt,
           });
         }
       } catch (error) {
@@ -194,9 +195,12 @@ export class DiscordService {
         (msg: {
           author: { globalName?: string; username: string };
           content: string;
+          createdAt: Date;
         }) => ({
           username: msg.author.globalName || msg.author.username,
           message: replaceUserMentionsWithUsernames(msg.content, this.client),
+          images: [],
+          createdAt: msg.createdAt.toISOString(),
         })
       )
       .filter(

@@ -3,7 +3,6 @@ import express from "express";
 import morgan from "morgan";
 import { logger } from "./logger.ts";
 import { DiscordService } from "./services/discord.ts";
-import { formatMessage } from "./utils/helpers.ts";
 
 export function createServer(discordService: DiscordService) {
   const app = express();
