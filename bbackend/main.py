@@ -34,7 +34,6 @@ async def root():
 async def summarize(request: SummaryRequest):
     try:
         logger.info(f"Received summary request for channel: {request.channel_id}")
-        logger.info(f"Number of messages to summarize: {len(request.messages)}")
         logger.info(f"Saving thread {request.thread_id} messages")
         MessageMemory.store_thread(request.thread_id, request.messages)
 

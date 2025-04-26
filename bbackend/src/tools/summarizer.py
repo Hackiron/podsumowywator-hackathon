@@ -2,7 +2,8 @@ from agents import Agent, Runner, function_tool
 from src.prompts.summarizer_prompt import SUMMARIZER_PROMPT
 from loguru import logger
 from src.memory import MessageMemory
-from src.dtos import Message
+from src.dtos import Message, ConversationContext
+from agents import RunContextWrapper
 
 
 def _messages_to_string(messages: list[Message]) -> str:
@@ -10,7 +11,11 @@ def _messages_to_string(messages: list[Message]) -> str:
 
 
 @function_tool
-async def summarizer_agent_tool(messages_uuid: str, query: str | None = None):
+async def summarizer_agent_tool(
+    wrapper_context: RunContextWrapper[ConversationContext],
+    messages_uuid: str,
+    query: str | None = None,
+):
     """
     A tool that summarizes the messages and answers to the query.
     It works on the messages that are stored in the memory by the load_messages tool.
@@ -27,7 +32,7 @@ async def summarizer_agent_tool(messages_uuid: str, query: str | None = None):
     summarizer_agent = Agent(
         name="Summarizer",
         instructions=SUMMARIZER_PROMPT,
-        model="gpt-4.1-mini",
+        model=wrapper_context.context.config.summarizer_model,
     )
 
     messages_string = _messages_to_string(messages)

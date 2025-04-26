@@ -13,7 +13,8 @@ Content-Type: application/json
     "messages": [
         {
             "username": "Domin",
-            "message": "Summarize messages between 2024-01-01 and 2024-01-02"
+            "message": "Summarize messages between 2024-01-01 and 2024-01-02",
+            "images": []
         }
     ],
     "channelId": "1234",
@@ -28,15 +29,18 @@ Content-Type: application/json
     "messages": [
         {
             "username": "Domin",
-            "message": "Summarize messages between 2024-01-01 and 2024-01-02"
+            "message": "Summarize messages between 2024-01-01 and 2024-01-02",
+            "images": []
         },
         {
             "username": "Assistant",
-            "message": "- John powitał Jane i zapytał, jak się ma"
+            "message": "- John powitał Jane i zapytał, jak się ma",
+            "images": []
         },
         {
             "username": "Domin",
-            "message": "What Jane said?"
+            "message": "What Jane said?",
+            "images": []
         }
     ],
     "channelId": "1234",
@@ -51,7 +55,8 @@ Content-Type: application/json
     "messages": [
         {
             "username": "Domin",
-            "message": "Co tam się działo przez ostatnie 4 godziny?"
+            "message": "Co tam się działo przez ostatnie 4 godziny?",
+            "images": []
         }
     ],
     "channelId": "1234",

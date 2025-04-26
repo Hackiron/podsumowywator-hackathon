@@ -2,11 +2,14 @@ from agents import Agent, Runner, function_tool
 from src.prompts.date_processor_prompt import DATE_PROCESSOR_PROMPT
 from loguru import logger
 from src.memory import MessageMemory
-from datetime import datetime
+from src.dtos import ConversationContext
+from agents import RunContextWrapper
 
 
 @function_tool
-async def date_processor_agent_tool(thread_id: str) -> str | None:
+async def date_processor_agent_tool(
+    wrapper_context: RunContextWrapper[ConversationContext], thread_id: str
+) -> str | None:
     """
     Check whether the last user message contains a date range and return it in ISO format.
 
@@ -25,10 +28,10 @@ async def date_processor_agent_tool(thread_id: str) -> str | None:
     date_processor_agent = Agent(
         name="Date Processor",
         instructions=DATE_PROCESSOR_PROMPT,
-        model="gpt-4.1-mini",
+        model=wrapper_context.context.config.date_processor_model,
     )
-    current_date = datetime.now().isoformat()
-    agent_input = f"Current date: {current_date}\nInput: {last_message.message}"
+
+    agent_input = f"Current date: {wrapper_context.context.current_date}\nInput: {last_message.message}"
     logger.info(f"Date processor agent input: {agent_input}")
 
     result = await Runner.run(
