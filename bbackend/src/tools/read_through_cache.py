@@ -224,6 +224,64 @@ class ReadThroughCache:
         # For this implementation, we return all messages since our test messages don't have timestamps
         return messages
 
+    def _merge_touching_ranges(self, channel_id: str, new_start: str, new_end: str, new_messages: List[Message]) -> Tuple[str, str, List[Message]]:
+        """
+        Add new range to cache and optimize.
+        """
+        if channel_id not in self.cache:
+            self.cache[channel_id] = []
+        
+        # Add new range to cache
+        self.cache[channel_id].append((new_start, new_end, new_messages))
+        
+        # Optimize the entire cache for this channel
+        self._optimize_cache(channel_id)
+        
+        # Find the range that now contains our new data
+        for start, end, messages in self.cache[channel_id]:
+            if self._is_range_contained(new_start, new_end, start, end):
+                return (start, end, messages)
+        
+        # This shouldn't happen if optimization worked correctly
+        logger.error("Cache optimization failed to maintain data consistency")
+        return (new_start, new_end, new_messages)
+
+    def _optimize_cache(self, channel_id: str):
+        """
+        Optimize the cache by merging all touching/overlapping ranges for a channel.
+        This ensures the cache is always in the most efficient state.
+        """
+        if channel_id not in self.cache or not self.cache[channel_id]:
+            return
+
+        # Sort ranges by start date
+        ranges = sorted(self.cache[channel_id], key=lambda x: self._parse_date(x[0]))
+        optimized = []
+        current_start, current_end, current_messages = ranges[0]
+        current_start_dt = self._parse_date(current_start)
+        current_end_dt = self._parse_date(current_end)
+
+        for next_start, next_end, next_messages in ranges[1:]:
+            next_start_dt = self._parse_date(next_start)
+            next_end_dt = self._parse_date(next_end)
+
+            # Check if ranges touch or overlap (within 1 second)
+            if next_start_dt <= current_end_dt + timedelta(seconds=1):
+                # Merge the ranges
+                current_end_dt = max(current_end_dt, next_end_dt)
+                current_end = self._format_iso_date(current_end_dt)
+                current_messages = self._merge_messages([current_messages, next_messages])
+            else:
+                # Add the current range and start a new one
+                optimized.append((current_start, current_end, current_messages))
+                current_start, current_end = next_start, next_end
+                current_start_dt, current_end_dt = next_start_dt, next_end_dt
+                current_messages = next_messages
+
+        # Add the last range
+        optimized.append((current_start, current_end, current_messages))
+        self.cache[channel_id] = optimized
+
     def load(self, channel_id: str, start_date: str, end_date: str) -> List[Message]:
         """
         Load messages for a channel within the specified date range.
@@ -283,7 +341,11 @@ class ReadThroughCache:
                     if channel_id not in self.cache:
                         self.cache[channel_id] = []
                     
-                    self.cache[channel_id].append((missing_start, missing_end, new_messages))
+                    # Add to cache and optimize
+                    merged_start, merged_end, merged_messages = self._merge_touching_ranges(
+                        channel_id, missing_start, missing_end, new_messages
+                    )
+                    # Note: _merge_touching_ranges now handles adding to cache and optimization
             else:
                 logger.debug("No missing date ranges, using cached data only")
             
@@ -304,10 +366,9 @@ class ReadThroughCache:
             
             logger.debug(f"Fetched {len(messages)} messages from API")
             
-            # Store in cache
-            if channel_id not in self.cache:
-                self.cache[channel_id] = []
-            
-            self.cache[channel_id].append((start_date, end_date, messages))
+            # Store in cache and optimize
+            merged_start, merged_end, merged_messages = self._merge_touching_ranges(
+                channel_id, start_date, end_date, messages
+            )
             
             return messages

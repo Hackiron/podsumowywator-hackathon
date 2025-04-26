@@ -6,17 +6,6 @@ GET http://localhost:3000/matchenatinderze
 
 ###
 
-
-# class Message(BaseModel):
-#     username: str
-#     message: str
-#     images: list[str]
-
-# class SummaryRequest(BaseModel):
-#     messages: list[Message]
-#     channel_id: str = Field(alias="channelId")
-#     thread_id: str = Field(alias="threadId")
-
 POST http://localhost:8000/ruchniecie
 Content-Type: application/json
 
@@ -26,7 +15,7 @@ Content-Type: application/json
     "messages": [
         {
             "username": "user1",
-            "message": "Co się działo od 1 do 3 kwietnia 2025?",
+            "message": "Co się działo od 6 do 11 kwietnia 2025?",
             "images": []
         }
     ]
